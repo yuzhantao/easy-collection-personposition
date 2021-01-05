@@ -15,6 +15,7 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
  * @author lei_w
  * @version 2016 下午11:41:53
  */
+@SuppressWarnings("deprecation")
 public final class PropertiesUtil extends PropertyPlaceholderConfigurer {
     private static final byte[] KEY = {9, -1, 0, 5, 39, 8, 6, 19};
     private static Map<String, String> ctxPropertiesMap;
