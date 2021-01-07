@@ -43,10 +43,9 @@ public class TestPersonPositionDeviceController {
 
 	private MockMvc mockMvc;
 	
-	@SuppressWarnings("deprecation")
 	@Before
 	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
+		MockitoAnnotations.openMocks(this);
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
 	
@@ -54,7 +53,6 @@ public class TestPersonPositionDeviceController {
 	 * 测试新增设备
 	 * @throws Exception
 	 */
-	@SuppressWarnings("deprecation")
 	@Test
 	@Transactional
     @Rollback(true)
@@ -64,7 +62,7 @@ public class TestPersonPositionDeviceController {
 		dev.setId("127.0.0.1");
 		String json = JSON.toJSONString(dev);
 		MvcResult mr = mockMvc.perform(
-				MockMvcRequestBuilders.post("/devices/person-position-devices").contentType(MediaType.APPLICATION_JSON_UTF8).content(json))
+				MockMvcRequestBuilders.post("/devices/person-position-devices").contentType(MediaType.APPLICATION_JSON).content(json))
 				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk()).andReturn();
 		String retJson = mr.getResponse().getContentAsString();
 		PersonPositionDevice ret = JSON.parseObject(retJson, PersonPositionDevice.class);

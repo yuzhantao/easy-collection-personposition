@@ -1,18 +1,6 @@
 package com.bimuo.easy.collection.personposition.v1.service;
 
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.bimuo.easy.collection.personposition.core.annotation.EventHandle;
-import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceTagsVo;
-import com.google.common.eventbus.EventBus;
 
 @Service
 public class PersonPositionEventBusService {
