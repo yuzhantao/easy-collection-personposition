@@ -56,7 +56,6 @@ dependencies {
 	implementation 'org.webjars:stomp-websocket:2.3.3-1'
 	implementation 'org.webjars:webjars-locator:0.30'
 	implementation 'org.webjars:echarts:4.1.0'
-	// annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.integration:spring-integration-test'
 	compile project (path:':easy-license-core', configuration:'default')
