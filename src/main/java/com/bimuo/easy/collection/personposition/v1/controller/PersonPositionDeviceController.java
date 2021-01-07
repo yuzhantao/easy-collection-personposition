@@ -1,7 +1,6 @@
 package com.bimuo.easy.collection.personposition.v1.controller;
 
 import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +21,13 @@ import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.google.common.base.Preconditions;
 
+/**
+ * 人员定位设备CRUD控制器
+ * 
+ * @author yuzhantao 
+ * @author Pingfan
+ *
+ */
 @RestController
 @RequestMapping("/devices/person-position-devices")
 public class PersonPositionDeviceController {
@@ -64,14 +70,17 @@ public class PersonPositionDeviceController {
 	}
 	
 	// 修改需要先查询
+	// TODO 修改掉了时间,未修改成功?
 	@PutMapping(value = "/{deviceCode}")
 	public ResponseEntity<?> updateAsset(@PathVariable String deviceCode) throws Exception {
 		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceCode);
 		Preconditions.checkNotNull(ppd,"修改的设备不能为空!");
-		ppd.setDeviceCode(deviceCode);
+//		ppd.setDeviceCode(deviceCode);
 		ppd.setUpdateTime(new Date());
 		boolean isSuccess = personPositionDeviceService.modify(ppd);
 		Preconditions.checkArgument(isSuccess,"修改设备信息失败!");
 		return ResponseEntity.ok(ppd);
 	}
+
+
 }

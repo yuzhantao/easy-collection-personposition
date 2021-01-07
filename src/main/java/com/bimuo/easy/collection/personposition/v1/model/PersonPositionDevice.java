@@ -14,6 +14,12 @@ import org.springframework.data.annotation.CreatedDate;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+/**
+ * 人员定位设备实体类
+ * 
+ * @author yuzhantao
+ *
+ */
 @Entity
 @Table
 public class PersonPositionDevice {
