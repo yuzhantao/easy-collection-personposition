@@ -28,6 +28,11 @@ import com.alibaba.fastjson.JSON;
 import com.bimuo.easy.collection.personposition.EasyCollectionPersonpositionApplication;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 
+/**
+ * 人员定位设备接口测试
+ * @author yuzhantao
+ *
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = EasyCollectionPersonpositionApplication.class)
 @WebAppConfiguration
