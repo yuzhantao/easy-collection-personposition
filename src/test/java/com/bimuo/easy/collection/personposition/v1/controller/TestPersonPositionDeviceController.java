@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.alibaba.fastjson.JSON;
-import com.bimuo.easy.collection.personposition.v1.EasyCollectionPersonpositionApplication;
+import com.bimuo.easy.collection.personposition.EasyCollectionPersonpositionApplication;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 
 @RunWith(SpringRunner.class)
