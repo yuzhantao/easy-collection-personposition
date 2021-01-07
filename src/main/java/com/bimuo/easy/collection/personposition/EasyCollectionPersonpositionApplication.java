@@ -1,4 +1,4 @@
-package com.bimuo.easy.collection.personposition.v1;
+package com.bimuo.easy.collection.personposition;
 
 import javax.annotation.PostConstruct;
 
