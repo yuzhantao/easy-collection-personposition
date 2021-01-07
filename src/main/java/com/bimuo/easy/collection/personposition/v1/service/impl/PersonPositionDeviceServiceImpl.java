@@ -80,7 +80,7 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 
 	@Override
 	public int countByDeviceState(String deviceState) {
-		// TODO Auto-generated method stub
+		personPositionDeviceRepository.count();
 		return 0;
 	}
 
