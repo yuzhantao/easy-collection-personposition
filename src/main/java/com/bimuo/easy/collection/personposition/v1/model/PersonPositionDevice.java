@@ -31,6 +31,21 @@ public class PersonPositionDevice {
 	private String deviceCode;
 	
 	/**
+	 * 设备状态
+	 */
+	private String deviceState;
+	
+	/**
+	 * 设备类型
+	 */
+	private String deviceType;
+	
+	/**
+	 * ip地址
+	 */
+	private String ip;
+
+	/**
 	 * 创建时间
 	 */
 	@CreatedDate
@@ -59,7 +74,31 @@ public class PersonPositionDevice {
 	public void setDeviceCode(String deviceCode) {
 		this.deviceCode = deviceCode;
 	}
+	
+	public String getDeviceState() {
+		return deviceState;
+	}
 
+	public void setDeviceState(String deviceState) {
+		this.deviceState = deviceState;
+	}
+	
+	public String getDeviceType() {
+		return deviceType;
+	}
+
+	public void setDeviceType(String deviceType) {
+		this.deviceType = deviceType;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+	
 	public Date getCreateTime() {
 		return createTime;
 	}
