@@ -6,11 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.bimuo.easy.collection.personposition.core.message.IMessageHandleFactory;
 import com.bimuo.easy.collection.personposition.core.server.CollectionServer;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.PersonPositionMessageHandleFactory;
-
-import io.netty.channel.ChannelHandler;
 
 @SpringBootApplication
 public class EasyCollectionPersonpositionApplication {
