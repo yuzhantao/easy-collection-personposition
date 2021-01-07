@@ -54,6 +54,7 @@ public interface IPersonPositionDeviceService {
 	
 	/**
 	 * 统计在线离线数量
+	 * @param deviceState
 	 * @return
 	 */
 	public int countByDeviceState(String deviceState);

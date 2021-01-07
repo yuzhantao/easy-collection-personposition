@@ -20,6 +20,13 @@ import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDev
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.google.common.base.Preconditions;
 
+/**
+ * 人员定位相关服务实现类
+ * 
+ * @author yuzhantao
+ * @author Pingfan
+ *
+ */
 @Transactional
 @Service
 public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceService {
