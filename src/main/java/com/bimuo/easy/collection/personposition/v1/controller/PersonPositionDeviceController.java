@@ -1,6 +1,8 @@
 package com.bimuo.easy.collection.personposition.v1.controller;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -73,5 +75,24 @@ public class PersonPositionDeviceController {
 		boolean isSuccess = personPositionDeviceService.modify(ppd);
 		Preconditions.checkArgument(isSuccess,"修改设备信息失败!");
 		return ResponseEntity.ok(ppd);
+	}
+	
+	@RequestMapping(value = "/{deviceState}")
+	public ResponseEntity<?> countDeviceState(@PathVariable String deviceCode,@PathVariable String deviceState) throws Exception {
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceCode);
+		Preconditions.checkArgument(ppd != null, "查询的设备编号" + deviceCode + "不存在!");
+		int online = this.personPositionDeviceService.countByDeviceState("online");
+		int offline = this.personPositionDeviceService.countByDeviceState("offline");
+		Map<String,Integer> ret = new HashMap<>();
+		ret.put("onlineDevice", online);
+		ret.put("offlineDevice", offline);
+		return ResponseEntity.ok(ret);
+//		if(ppd.getDeviceState().equals("online")) {
+//			return ResponseEntity.ok(online);
+//		} else if (ppd.getDeviceState().equals("offline")) {
+//			return ResponseEntity.ok(offline);
+//		} else {
+//			return ResponseEntity.ok("未读取到设备状态,请检查设备");
+//		}
 	}
 }

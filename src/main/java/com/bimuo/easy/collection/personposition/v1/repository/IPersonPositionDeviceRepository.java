@@ -20,4 +20,11 @@ public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPos
 	 * @return
 	 */
 	int deleteOneByDeviceCode(String deviceCode);
+	
+	/**
+	 * 统计设备状态(在线,离线)
+	 * @param deviceState
+	 * @return
+	 */
+	int countByDeviceState(String deviceState);
 }
