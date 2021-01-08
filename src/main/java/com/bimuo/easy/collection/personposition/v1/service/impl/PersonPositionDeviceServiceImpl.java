@@ -15,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
+import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeAlreadyExistsException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
@@ -70,7 +73,7 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 	public boolean insert(PersonPositionDevice dev) {
 		Preconditions.checkNotNull(dev.getDeviceCode(), "添加的设备编号不能为空!");
 		PersonPositionDevice ppd = this.personPositionDeviceRepository.getOneByDeviceCode(dev.getDeviceCode());
-		Preconditions.checkArgument(ppd == null, "添加的设备编号" + dev.getDeviceCode() + "已存在!");
+		AssertUtils.checkArgument(ppd == null, new DeviceCodeAlreadyExistsException());
 		this.personPositionDeviceRepository.save(dev);
 		return true;
 	}
