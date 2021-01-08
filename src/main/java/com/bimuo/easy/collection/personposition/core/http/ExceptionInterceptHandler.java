@@ -18,7 +18,7 @@ public class ExceptionInterceptHandler {
 	@ExceptionHandler({ Throwable.class })
 	public ResponseEntity<?> exceptionHandler(HttpServletRequest request, HttpServletResponse response, Throwable ex) {
 		ResponseEntity<?> responseEntity = null;
-		if(ex instanceof BusinessException && ex.getClass().isAnnotationPresent(ResponseStatus.class)) {
+		if(ex.getClass().isAnnotationPresent(ResponseStatus.class)) {
 			ResponseStatus rs = ex.getClass().getAnnotation(ResponseStatus.class);
 			responseEntity = ResponseEntity.status(rs.value()).body(rs.reason());
 		}else {
