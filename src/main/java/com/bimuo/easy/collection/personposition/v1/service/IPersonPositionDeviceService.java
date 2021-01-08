@@ -1,5 +1,6 @@
 package com.bimuo.easy.collection.personposition.v1.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -23,50 +24,61 @@ public interface IPersonPositionDeviceService {
 	 * @param deviceType
 	 * @param ip
 	 * @param pageable
-	 * @return
+	 * @return 实时设备列表
 	 */
 	Page<PersonPositionDevice> queryList(String deviceState,String deviceCode,String deviceType,String ip,Pageable pageable);
 	
 	/**
+	 * 根据开始结束时间查询历史
+	 * @param startTime
+	 * @param endTime
+	 * @param pageable
+	 * @return 历史设备列表
+	 */
+	Page<PersonPositionDevice> queryHistory(Date startTime,Date endTime,Pageable pageable);
+	
+	/**
 	 * 根据设备编号查询单个设备
-	 * @param deviceCode
-	 * @return
+	 * @param deviceCode 设备编号
+	 * @return 查询的设备实体
 	 */
 	PersonPositionDevice getOneByDeviceCode(String deviceCode);
 	
 	/**
 	 * 添加人员定位设备
-	 * @param dev
-	 * @return
+	 * @param dev 设备实体
+	 * @return 是否添加成功
 	 */
 	public boolean insert(PersonPositionDevice dev);
 	
 	/**
 	 * 删除人员定位设备
-	 * @param deviceCode
-	 * @return
+	 * @param deviceCode 设备编号
+	 * @return 是否删除成功
 	 */
 	public boolean delete(String deviceCode);
 
 	/**
 	 * 修改设备配置信息
-	 * @param deviceCode
-	 * @return
+	 * @param deviceCode 设备比爱你好
+	 * @return 是否修改成功
 	 */
 	public boolean modify(PersonPositionDevice dev);
 	
 	/**
 	 * 统计在线离线数量
-	 * @param deviceState
-	 * @return
+	 * @param deviceState 设备状态
+	 * @return 在线离线设备数量
 	 */
 	public int countByDeviceState(String deviceState);
 	
 //	/**
-//	 * 导出数据到Excel
-//	 * 
+//	 * 导出历史数据到Excel
+//	 * @param startTime
+//	 * @param endTime
+//	 * @param pageable
 //	 * @return
 //	 */
-//	List<BrandInfo> toExcel(PersonPositionDevice dev);
+//	List<BrandInfo> toExcel(Date startTime, Date endTime, Pageable pageable);
 
 }

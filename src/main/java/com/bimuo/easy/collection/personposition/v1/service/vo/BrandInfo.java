@@ -1,6 +1,7 @@
 package com.bimuo.easy.collection.personposition.v1.service.vo;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import lombok.Data;
@@ -29,9 +30,58 @@ public class BrandInfo implements Serializable {
     private String ip;
  
     @Excel(name = "createTime",width = 20,exportFormat = "yyyy-MM-dd HH:mm:ss", orderNum = "1")
-    private String createTime;
+    private Date createTime;
  
     @Excel(name = "updateTime",width = 20,exportFormat = "yyyy-MM-dd HH:mm:ss", orderNum = "1")
-    private String updateTime;
+    private Date updateTime;
 
+	public String getDeviceCode() {
+		return deviceCode;
+	}
+
+	public void setDeviceCode(String deviceCode) {
+		this.deviceCode = deviceCode;
+	}
+
+	public String getDeviceState() {
+		return deviceState;
+	}
+
+	public void setDeviceState(String deviceState) {
+		this.deviceState = deviceState;
+	}
+
+	public String getDeviceType() {
+		return deviceType;
+	}
+
+	public void setDeviceType(String deviceType) {
+		this.deviceType = deviceType;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public Date getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
+
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	
 }

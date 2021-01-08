@@ -80,7 +80,7 @@ public class TestPersonPositionDeviceController {
 	@Test
 	@Transactional
     @Rollback(true)
-	public void testQueryAsset() throws Exception {
+	public void testQueryDevice() throws Exception {
 		MvcResult mr = mockMvc.perform(
 				MockMvcRequestBuilders.get("/devices/person-position-devices/123456").contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk()).andReturn();
@@ -97,7 +97,7 @@ public class TestPersonPositionDeviceController {
 	@Test
 	@Transactional
     @Rollback(true)
-	public void testGetAssetList() throws Exception {
+	public void testQueryDeviceList() throws Exception {
 		MvcResult mr = mockMvc.perform(
 				MockMvcRequestBuilders.get("/devices/person-position-devices").contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk()).andReturn();
@@ -115,7 +115,7 @@ public class TestPersonPositionDeviceController {
 	@Test
 	@Transactional
 	@Rollback(true)
-	public void testUpdate() throws Exception {
+	public void testUpdateDevice() throws Exception {
 		PersonPositionDevice dev = new PersonPositionDevice();
 		dev.setDeviceCode("123459");
 		String json = JSON.toJSONString(dev);
@@ -136,7 +136,7 @@ public class TestPersonPositionDeviceController {
 	@Test
 	@Transactional
 	@Rollback(true)
-	public void testDeleteAsset() throws Exception {
+	public void testDeleteDevice() throws Exception {
 		MvcResult mr = mockMvc.perform(
 				MockMvcRequestBuilders.delete("/devices/person-position-devices/123456").contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk()).andReturn();

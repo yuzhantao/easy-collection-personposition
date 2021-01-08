@@ -16,9 +16,8 @@ import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDevice
  * @author Pingfan
  *
  */
-
 @RestController
-@RequestMapping("/device-count")
+@RequestMapping("/devices-count")
 public class DeviceCountController {
 	
 	@Autowired
