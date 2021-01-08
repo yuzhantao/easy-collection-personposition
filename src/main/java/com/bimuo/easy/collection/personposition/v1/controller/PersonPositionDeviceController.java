@@ -75,10 +75,13 @@ public class PersonPositionDeviceController {
 	public ResponseEntity<?> updateAsset(@PathVariable String deviceCode) throws Exception {
 		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceCode);
 		Preconditions.checkNotNull(ppd,"修改的设备不能为空!");
-//		ppd.setDeviceCode(deviceCode);
+
 		ppd.setUpdateTime(new Date());
-		boolean isSuccess = personPositionDeviceService.modify(ppd);
-		Preconditions.checkArgument(isSuccess,"修改设备信息失败!");
+		
+		// 
+		boolean isSuccess = personPositionDeviceService.modify(ppd);	// D
+		Preconditions.checkArgument(isSuccess,"修改设备信息失败!");			// FDFD
+		
 		return ResponseEntity.ok(ppd);
 	}
 

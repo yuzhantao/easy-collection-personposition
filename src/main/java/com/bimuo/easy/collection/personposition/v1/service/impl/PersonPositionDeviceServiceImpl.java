@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
+import com.bimuo.easy.collection.personposition.v1.service.vo.BrandInfo;
 import com.google.common.base.Preconditions;
 
 /**
@@ -89,5 +90,17 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 	public int countByDeviceState(String deviceState) {
 		return personPositionDeviceRepository.countByDeviceState(deviceState);
 	}
+
+//	@Override
+//	public List<BrandInfo> toExcel(PersonPositionDevice dev) {
+//		List<PersonPositionDevice> devices = personPositionDeviceRepository.toExcel(dev.getCreateTime(), dev.getUpdateTime());
+//		List<BrandInfo> excelInfo = null; 
+//		for(int i=0;i<devices.size();i++){//通过循环来赋值给另一个List
+//			Object object=devices.get(i);
+//			BrandInfo gg = new BrandInfo();
+//			excelInfo.add((BrandInfo) object);
+//		}
+//		return excelInfo;
+//	}
 	
 }

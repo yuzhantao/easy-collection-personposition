@@ -1,9 +1,12 @@
 package com.bimuo.easy.collection.personposition.v1.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
+import com.bimuo.easy.collection.personposition.v1.service.vo.BrandInfo;
 
 /**
  * 人员定位相关服务
@@ -58,5 +61,12 @@ public interface IPersonPositionDeviceService {
 	 * @return
 	 */
 	public int countByDeviceState(String deviceState);
+	
+//	/**
+//	 * 导出数据到Excel
+//	 * 
+//	 * @return
+//	 */
+//	List<BrandInfo> toExcel(PersonPositionDevice dev);
 
 }

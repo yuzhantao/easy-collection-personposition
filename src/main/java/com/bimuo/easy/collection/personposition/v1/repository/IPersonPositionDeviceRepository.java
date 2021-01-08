@@ -1,7 +1,11 @@
 package com.bimuo.easy.collection.personposition.v1.repository;
 
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 
@@ -27,4 +31,14 @@ public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPos
 	 * @return
 	 */
 	int countByDeviceState(String deviceState);
+	
+	/**
+	 * 根据开始结束时间导出数据到Excel
+	 * 
+	 * @return
+	 */
+//	@Query("SELECT * FROM PERSON_POSITION_DEVICE "
+//			+ "WHERE CREATE_TIME BETWEEN :startTime AND :endTime "
+//			+ "ORDER BY DEVICE_CODE DESC")
+//	List<PersonPositionDevice> toExcel(Date startTime, Date endTime);
 }

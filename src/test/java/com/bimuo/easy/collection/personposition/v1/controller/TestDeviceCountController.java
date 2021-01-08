@@ -7,7 +7,7 @@ import javax.transaction.Transactional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.MockitoAnnotations;
@@ -24,10 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.alibaba.fastjson.JSON;
 import com.bimuo.easy.collection.personposition.EasyCollectionPersonpositionApplication;
-import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
-
 /**
  * 统计在线离线设备接口测试类
  * 
@@ -44,10 +41,9 @@ public class TestDeviceCountController {
 
 	private MockMvc mockMvc;
 	
-	@SuppressWarnings("deprecation")
 	@Before
 	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
+		MockitoAnnotations.openMocks(this);
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
 	
