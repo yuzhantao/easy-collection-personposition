@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceAddFailedException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceDeleteFailedException;
@@ -69,6 +70,7 @@ public class PersonPositionDeviceController {
 	@GetMapping("/{deviceCode}")
 	public ResponseEntity<?> queryDevice(@PathVariable String deviceCode) throws Exception{
 		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceCode);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
 		return ResponseEntity.ok(ppd);
 	}
 	
@@ -125,7 +127,6 @@ public class PersonPositionDeviceController {
 		if(StringUtils.isNotBlank(deviceState)) {
 			ppd.setDeviceState(deviceState);
 		}
-		
 		// 更新时间自动更改
 		ppd.setUpdateTime(new Date()); 
 		

@@ -1,6 +1,7 @@
 package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp;
 
 import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +27,8 @@ import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.res
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.DeviceTagReadVo;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag1Vo;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.service.DeviceCodeService;
+import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
+import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
 import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
 
@@ -42,14 +45,16 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	
 	private PersonPositionEventBusService personPositionEventBusService;
 	private DeviceCodeService deviceCodeService; // 解析设备回复的指令
+	private IPersonPositionDeviceService personPositionDeviceService; // 人员定位相关服务
 	
 	private static int linkDeviceCount = 0; // 设备总数量
 	private int deviceIndex; // 设备索引号
 	
-	public PersonPositionResponseHandleContext(PersonPositionEventBusService personPositionEventBusService, DeviceCodeService deviceCodeService) {
+	public PersonPositionResponseHandleContext(PersonPositionEventBusService personPositionEventBusService, DeviceCodeService deviceCodeService, IPersonPositionDeviceService personPositionDeviceService) {
 		super();
 		this.personPositionEventBusService = personPositionEventBusService;
 		this.deviceCodeService = deviceCodeService;
+		this.personPositionDeviceService = personPositionDeviceService;
 		this.messageHandleContent = new MessageHandleContext<>();
 //		this.messageHandleContent.setOnlyHandle(false);
 //		
@@ -126,7 +131,14 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		}
 
 		MDC.put("ip", ip);
-		logger.info("人员定位设备已断开{}", ip);
+		// 离线时根据ip查询离线设备,再将设备状态改为offline,同时修改更新时间
+		PersonPositionDevice dev = personPositionDeviceService.getOneByIp(ip);
+		if(dev != null) {
+			dev.setDeviceState("offline");
+			dev.setUpdateTime(new Date());
+			personPositionDeviceService.modify(dev);
+		}
+		logger.info("人员定位设备已断开{},设备状态为{}",ip,dev.getDeviceState());
 		MDC.remove("ip");
 
 //		NetMapping.getInstance().removeChannel(ctx.channel());
@@ -146,9 +158,32 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	@NotProguard
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PersonPositionMessage msg) throws Exception {	
-		byte[] data = msg.getData();
+		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+		String ip = insocket.getAddress().getHostAddress();
+		
+		byte[] data = msg.getData(); // 接收设备完整回复的指令
+		byte[] deviceIdArray = msg.getDevId(); // 单独复制设备编号指令段以便查询,从而修改状态,deviceId两字节
+		
 		if(msg.getCommand() == 0x44) { //0x44协议用来读取设备配置
 			System.out.println("==========设备回复指令的协议是:" + msg.getCommand() + " " + "Data段是:" + ByteUtil.byteArrToHexString(data));
+			
+			// 一旦设备连接,查到设备则更新设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
+			PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+			logger.info("连接的设备编号是{}",ByteUtil.byteArrToHexString(deviceIdArray));
+			if(dev != null){
+				dev.setDeviceState("online");
+				dev.setIp(ip);
+				dev.setUpdateTime(new Date());
+			} else {
+				PersonPositionDevice newDevice = new PersonPositionDevice();
+				newDevice.setDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+				newDevice.setDeviceState("online");
+				newDevice.setCreateTime(new Date());
+				newDevice.setUpdateTime(new Date());
+				newDevice.setIp(ip);
+				personPositionDeviceService.insert(newDevice);
+			}
+			
 			//将配置类放入内存
 			DeviceConfigReadVo dconfig = new DeviceConfigReadVo();
 			dconfig.setTagType(data[11]); //11是指令Data[]段,含标签类型

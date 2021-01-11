@@ -29,7 +29,7 @@ public interface IPersonPositionDeviceService {
 	Page<PersonPositionDevice> queryList(String deviceState,String deviceCode,String deviceType,String ip,Pageable pageable);
 	
 	/**
-	 * 根据开始结束时间查询历史
+	 * 根据开始结束时间分页查询历史
 	 * @param startTime
 	 * @param endTime
 	 * @param pageable
@@ -38,11 +38,27 @@ public interface IPersonPositionDeviceService {
 	Page<PersonPositionDevice> queryHistory(Date startTime,Date endTime,Pageable pageable);
 	
 	/**
+	 * 根据开始结束时间不分页查询历史(供Excel导出用)
+	 * @param startTime
+	 * @param endTime
+	 * @return
+	 */
+	List<PersonPositionDevice> queryHistoryList(Date startTime,Date endTime);
+	
+	
+	/**
 	 * 根据设备编号查询单个设备
 	 * @param deviceCode 设备编号
 	 * @return 查询的设备实体
 	 */
 	PersonPositionDevice getOneByDeviceCode(String deviceCode);
+	
+	/**
+	 * 根据ip地址查询单个设备
+	 * @param ip ip地址
+	 * @return 查询的设备实体
+	 */
+	PersonPositionDevice getOneByIp(String ip);
 	
 	/**
 	 * 添加人员定位设备
@@ -60,7 +76,7 @@ public interface IPersonPositionDeviceService {
 
 	/**
 	 * 修改设备配置信息
-	 * @param deviceCode 设备比爱你好
+	 * @param dev 设备实体
 	 * @return 是否修改成功
 	 */
 	public boolean modify(PersonPositionDevice dev);
@@ -72,13 +88,13 @@ public interface IPersonPositionDeviceService {
 	 */
 	public int countByDeviceState(String deviceState);
 	
-//	/**
-//	 * 导出历史数据到Excel
-//	 * @param startTime
-//	 * @param endTime
-//	 * @param pageable
-//	 * @return
-//	 */
-//	List<BrandInfo> toExcel(Date startTime, Date endTime, Pageable pageable);
+	/**
+	 * 导出两天内历史数据到Excel
+	 * @param startTime 开始时间
+	 * @param endTime 结束时间
+	 * @param pageable
+	 * @return Excel实体集合
+	 */
+	List<BrandInfo> toExcel(Date startTime,Date endTime);
 
 }

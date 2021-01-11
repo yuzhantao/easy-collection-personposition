@@ -17,22 +17,22 @@ public class BrandInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Excel(name = "deviceCode", width = 25,orderNum = "0")
+	@Excel(name = "设备编号", width = 25,orderNum = "0")
     private String deviceCode;
  
-    @Excel(name = "deviceState", width = 25,orderNum = "0")
+    @Excel(name = "设备状态", width = 25,orderNum = "0")
     private String deviceState;
  
-    @Excel(name = "deviceType", width = 25,orderNum = "0")
+    @Excel(name = "设备类型", width = 25,orderNum = "0")
     private String deviceType;
  
-    @Excel(name = "ip", width = 25,orderNum = "0")
+    @Excel(name = "ip地址", width = 25,orderNum = "0")
     private String ip;
  
-    @Excel(name = "createTime",width = 20,exportFormat = "yyyy-MM-dd HH:mm:ss", orderNum = "1")
+    @Excel(name = "创建时间",width = 20,exportFormat = "yyyy-MM-dd HH:mm:ss", orderNum = "1")
     private Date createTime;
  
-    @Excel(name = "updateTime",width = 20,exportFormat = "yyyy-MM-dd HH:mm:ss", orderNum = "1")
+    @Excel(name = "更新时间",width = 20,exportFormat = "yyyy-MM-dd HH:mm:ss", orderNum = "1")
     private Date updateTime;
 
 	public String getDeviceCode() {

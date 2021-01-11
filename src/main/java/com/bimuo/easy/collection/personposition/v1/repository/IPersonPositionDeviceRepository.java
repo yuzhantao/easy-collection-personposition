@@ -1,13 +1,7 @@
 package com.bimuo.easy.collection.personposition.v1.repository;
 
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 
 public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPositionDevice, String>, JpaSpecificationExecutor<PersonPositionDevice> {
@@ -18,6 +12,13 @@ public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPos
 	 * @return 查询到的设备实体
 	 */
 	PersonPositionDevice getOneByDeviceCode(String deviceCode);
+	
+	/**
+	 * 根据ip地址查询一个设备
+	 * @param ip ip地址
+	 * @return 查询到的设备实体
+	 */
+	PersonPositionDevice getOneByIp(String ip);
 	
 	/**
 	 * 根据设备编号删除一个设备
