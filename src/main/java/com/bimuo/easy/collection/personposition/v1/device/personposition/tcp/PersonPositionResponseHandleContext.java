@@ -1,6 +1,7 @@
 package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,9 +26,8 @@ import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.res
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.tag.Tag253Decoder;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.tag.Tag30Decoder;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.DeviceTagReadVo;
-import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag1Vo;
-import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.service.DeviceCodeService;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
+import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
 import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
@@ -44,16 +44,16 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	private MessageHandleContext<PersonPositionMessage, Object> messageHandleContent;
 	
 	private PersonPositionEventBusService personPositionEventBusService;
-	private DeviceCodeService deviceCodeService; // 解析设备回复的指令
+	private IDeviceConfigService deviceConfigService; // 解析设备回复的指令
 	private IPersonPositionDeviceService personPositionDeviceService; // 人员定位相关服务
 	
 	private static int linkDeviceCount = 0; // 设备总数量
 	private int deviceIndex; // 设备索引号
 	
-	public PersonPositionResponseHandleContext(PersonPositionEventBusService personPositionEventBusService, DeviceCodeService deviceCodeService, IPersonPositionDeviceService personPositionDeviceService) {
+	public PersonPositionResponseHandleContext(PersonPositionEventBusService personPositionEventBusService, IDeviceConfigService deviceConfigService, IPersonPositionDeviceService personPositionDeviceService) {
 		super();
 		this.personPositionEventBusService = personPositionEventBusService;
-		this.deviceCodeService = deviceCodeService;
+		this.deviceConfigService = deviceConfigService;
 		this.personPositionDeviceService = personPositionDeviceService;
 		this.messageHandleContent = new MessageHandleContext<>();
 //		this.messageHandleContent.setOnlyHandle(false);
@@ -180,6 +180,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				newDevice.setDeviceState("online");
 				newDevice.setCreateTime(new Date());
 				newDevice.setUpdateTime(new Date());
+				newDevice.setDeviceType("人员定位设备");
 				newDevice.setIp(ip);
 				personPositionDeviceService.insert(newDevice);
 			}
@@ -187,7 +188,8 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			//将配置类放入内存
 			DeviceConfigReadVo dconfig = new DeviceConfigReadVo();
 			dconfig.setTagType(data[11]); //11是指令Data[]段,含标签类型
-			deviceCodeService.add(msg,dconfig);
+			deviceConfigService.addMemory(msg,dconfig);
+			
 			if(dconfig.getTagType() == 30){ //30是标签协议编号,目前设备只能读取标签30
 				System.out.println("===========发送指令的设备编号是:" + ByteUtil.byteArrToHexString(msg.getDevId()) + " " + "本次读取的标签类型为:" + dconfig.getTagType());
 			}
@@ -197,9 +199,9 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 
 		} else if(msg.getCommand() == 0x41){ //0x41协议用来读取标签
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());
-			int tagType = deviceCodeService.findByDeviceId(deviceId).getTagType();
+			int tagType = deviceConfigService.findByDeviceId(deviceId).getTagType();
 			System.out.println("该指令读到的标签类型是:" + tagType);
-			List<DeviceTagReadVo> tags = null;
+			List<DeviceTagReadVo> tags = new ArrayList<>();
 			if(tagType == 0 || tagType == 3 || tagType == 4 || tagType == 5 || tagType == 6){
 				ITagDecoder td = new Tag0Decoder();
 				tags = td.decoder(msg);

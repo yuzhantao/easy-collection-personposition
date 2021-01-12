@@ -8,13 +8,13 @@ package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.re
  */
 public class Tag1Vo extends DeviceTagReadVo {
 
-	private String tagId;	// 标签ID,20位	
+	private int tagId;	// 标签ID,20位	
 	private String gain;	// 增益,2位 (00表示增益0,01表示增益1,10表示增益2,11表示增益3)
 	
-	public String getTagId() {
+	public int getTagId() {
 		return tagId;
 	}
-	public void setTagId(String tagId) {
+	public void setTagId(int tagId) {
 		this.tagId = tagId;
 	}
 	public String getGain() {

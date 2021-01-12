@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.bimuo.easy.collection.personposition.core.message.IMessageHandleFactory;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.coder.PersonPositionDecoder;
-import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.service.DeviceCodeService;
+import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
 
@@ -17,7 +17,7 @@ public class PersonPositionMessageHandleFactory implements IMessageHandleFactory
 	PersonPositionEventBusService personPositionEventBusService;
 	
 	@Autowired
-	DeviceCodeService deviceCodeService;
+	IDeviceConfigService deviceCodeService;
 	
 	@Autowired
 	IPersonPositionDeviceService personPositionDeviceService;

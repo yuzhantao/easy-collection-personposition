@@ -1,7 +1,7 @@
 package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message;
 
 /**
- * 人员定位硬件 消息实体
+ * 人员定位硬件 回复消息实体
  * 
  * @author Pingfan
  *

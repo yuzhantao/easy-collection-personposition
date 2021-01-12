@@ -45,22 +45,21 @@ public class Tag1Decoder implements ITagDecoder<Tag1Vo> {
 			String gain = ByteUtil.intToBinary(rGain);
 			//String gain = bTag.substring(2, 3);
 			if(gain.equals("00")) {
-				tag1.setGain("0");
+				tag1.setGain("增益0");
 			} else if(gain.equals("01")) {
-				tag1.setGain("1");
+				tag1.setGain("增益1");
 			} else if(gain.equals("10")) {
-				tag1.setGain("2");
+				tag1.setGain("增益2");
 			} else if(gain.equals("11")) {
-				tag1.setGain("3");
+				tag1.setGain("增益3");
 			}
 			// 解tagId
 			int rTagId = replaceArr & 0xFFFFF; // 0xFFFFF用来过滤前4位得到后20位tagId
-			String tagId = ByteUtil.intToBinary(rTagId);
-			tag1.setTagId(tagId);
+			tag1.setTagId(rTagId);
 			tags.add(tag1);
 			log.info("第{}个标签1的gain值:{}，ID值:{}",i,
-					ByteUtil.intToBinary(rTagId),
-					ByteUtil.intToBinary(rGain));
+					Integer.toBinaryString(tag1.getTagId()),
+					tag1.getGain());
 		}
 		return tags;
 	}
