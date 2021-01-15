@@ -2,6 +2,7 @@ package com.bimuo.easy.collection.personposition.v1.model;
 
 
 import java.util.Date;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,9 +13,14 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.CreatedDate;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 /**
  * 人员定位设备实体类
@@ -24,6 +30,7 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 @Entity
 @Table
+@TypeDef(name = "json", typeClass = JsonStringType.class)
 public class PersonPositionDevice {
 	/**
 	 * 设备编号
@@ -68,6 +75,10 @@ public class PersonPositionDevice {
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	@Temporal(TemporalType.DATE)
 	private Date updateTime;
+	
+	@Type(type = "json")
+	@Column(columnDefinition = "json")
+	private DeviceConfigReadVo deviceConfig;
 
 	public String getId() {
 		return id;
@@ -124,6 +135,13 @@ public class PersonPositionDevice {
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
 	}
-	
-	
+
+	public DeviceConfigReadVo getDeviceConfig() {
+		return deviceConfig;
+	}
+
+	public void setDeviceConfig(DeviceConfigReadVo deviceConfig) {
+		this.deviceConfig = deviceConfig;
+	}
+
 }

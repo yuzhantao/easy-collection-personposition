@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.MDC;
@@ -12,6 +11,7 @@ import org.slf4j.MDC;
 import com.alibaba.fastjson.JSON;
 import com.bimuo.easy.collection.personposition.core.annotation.NotProguard;
 import com.bimuo.easy.collection.personposition.core.message.MessageHandleContext;
+import com.bimuo.easy.collection.personposition.core.server.CollectionServer;
 import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.HeartPackageHandle;
@@ -69,23 +69,25 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	@NotProguard
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		CollectionServer.channels.add(ctx.channel());
 		this.deviceIndex = ++linkDeviceCount;
-		// 电脑向设备发送读取阅读器配置参数指令
-		byte[] datas = {0x02,0x03,0x04,0x05,0x00,0x0B,0x00,0x58,0x44,0x00,(byte) 0xB5};
-		ByteBuf bs = Unpooled.copiedBuffer(datas);
-		ChannelFuture cf = ctx.writeAndFlush(bs);
-		// 回调函数监听是否发送成功
-		cf.addListener(new ChannelFutureListener() {
-			@NotProguard
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-				if (future.isSuccess()) {
-					logger.info("发送读取阅读器配置参数命令成功,下发命令={}",ByteUtil.byteArrToHexString(datas, true));
-				} else {
-					logger.error("发送读取阅读器配置参数命令失败,下发命令={}",ByteUtil.byteArrToHexString(datas, true));
-				}
-			}
-		});
+		// GetPersonPositionDeviceConfigTask替代下述代码
+//	    byte[] datas = {0x02,0x03,0x04,0x05,0x00,0x0B,0x00,0x58,0x44,0x00,(byte) 0xB5};
+//		ByteBuf bs = Unpooled.copiedBuffer(datas);
+//		ChannelFuture cf = ctx.writeAndFlush(bs);  
+//	    ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();    
+//		// 回调函数监听是否发送成功
+//		cf.addListener(new ChannelFutureListener() {
+//			@NotProguard
+//			@Override
+//			public void operationComplete(ChannelFuture future) throws Exception {
+//				if (future.isSuccess()) {
+//					logger.info("发送读取阅读器配置参数命令成功,下发命令={}",ByteUtil.byteArrToHexString(datas, true));
+//				} else {
+//					logger.error("发送读取阅读器配置参数命令失败,下发命令={}",ByteUtil.byteArrToHexString(datas, true));
+//				}
+//			}
+//		});
 
 		try {
 			PersonPositionMessage msg = new PersonPositionMessage();
@@ -112,6 +114,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		linkDeviceCount--;
+		CollectionServer.channels.remove(ctx.channel());
 		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 		String ip = insocket.getAddress().getHostAddress();
 
@@ -157,92 +160,108 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	
 	@NotProguard
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, PersonPositionMessage msg) throws Exception {	
+	protected void channelRead0(ChannelHandlerContext ctx, PersonPositionMessage msg) throws Exception {
 		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 		String ip = insocket.getAddress().getHostAddress();
-		
+
 		byte[] data = msg.getData(); // 接收设备完整回复的指令
 		byte[] deviceIdArray = msg.getDevId(); // 单独复制设备编号指令段以便查询,从而修改状态,deviceId两字节
-		
-		if(msg.getCommand() == 0x44) { //0x44协议用来读取设备配置
-			System.out.println("==========设备回复指令的协议是:" + msg.getCommand() + " " + "Data段是:" + ByteUtil.byteArrToHexString(data));
+
+		if (msg.getCommand() == 0x44) { // 0x44协议用来读取设备配置
+			logger.info("==========设备回复指令的协议是:" + msg.getCommand() + " " + "Data段是:" + ByteUtil.byteArrToHexString(data));
 			
+			// 1.处理设备配置信息
+			// 更新数据库配置信息,内含设备编号的判空以及设备信息的处理
+			DeviceConfigReadVo dconfig = deviceConfigService.updateConfig(
+					ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase(), // 设备id,回复的消息msg和Data[]段都有,msg取较方便
+					data[2], data[3], data[4], data[5], 
+					Byte.toString(data[6]), 
+					Byte.toString(data[7]), 
+					data[8], data[9], data[10], 
+					data[11], // 标签类型,11是硬件回复44协议Data[]段的11字节,后根据此字段读取标签类型
+					Byte.toString(data[12]));
+			
+			// 2.处理设备信息,下述逻辑在deviceConfigService实现(除ip地址)
 			// 一旦设备连接,查到设备则更新设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
+			// TODO 处理逻辑需讨论
 			PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-			logger.info("连接的设备编号是{}",ByteUtil.byteArrToHexString(deviceIdArray));
-			if(dev != null){
-				dev.setDeviceState("online");
-				dev.setIp(ip);
-				dev.setUpdateTime(new Date());
+			dev.setIp(ip);
+			personPositionDeviceService.modify(dev);
+			logger.info("==========连接的设备编号是{}", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+//			if (dev != null) {
+//				dev.setDeviceState("online");
+//				dev.setIp(ip);
+//				dev.setUpdateTime(new Date());
+//			dev.setDeviceConfig(dconfig);
+//				personPositionDeviceService.modify(dev);
+//				logger.info("数据库设备信息更新成功!");
+//			} else {
+//				PersonPositionDevice newDevice = new PersonPositionDevice();
+//				newDevice.setDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+//				newDevice.setDeviceState("online");
+//				newDevice.setCreateTime(new Date());
+//				newDevice.setUpdateTime(new Date());
+//				newDevice.setDeviceType("人员定位设备");
+//				newDevice.setIp(ip);
+//				newDevice.setDeviceConfig(dconfig);
+//				personPositionDeviceService.insert(newDevice);
+//				logger.info("数据库新添加设备信息成功!");
+//			}
+
+			// 2.将配置类放入内存
+			deviceConfigService.addMemory(msg, dconfig);
+
+			if (dconfig.getTagType() == 30) { // 30是标签协议编号,目前设备只能读取标签30
+				logger.info("===========发送指令的设备编号是:" + ByteUtil.byteArrToHexString(msg.getDevId()) + " "
+						+ "本次读取的标签类型为:" + dconfig.getTagType());
 			} else {
-				PersonPositionDevice newDevice = new PersonPositionDevice();
-				newDevice.setDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-				newDevice.setDeviceState("online");
-				newDevice.setCreateTime(new Date());
-				newDevice.setUpdateTime(new Date());
-				newDevice.setDeviceType("人员定位设备");
-				newDevice.setIp(ip);
-				personPositionDeviceService.insert(newDevice);
-			}
-			
-			//将配置类放入内存
-			DeviceConfigReadVo dconfig = new DeviceConfigReadVo();
-			dconfig.setTagType(data[11]); //11是指令Data[]段,含标签类型
-			deviceConfigService.addMemory(msg,dconfig);
-			
-			if(dconfig.getTagType() == 30){ //30是标签协议编号,目前设备只能读取标签30
-				System.out.println("===========发送指令的设备编号是:" + ByteUtil.byteArrToHexString(msg.getDevId()) + " " + "本次读取的标签类型为:" + dconfig.getTagType());
-			}
-			else {
-				System.out.println("===========发送指令的设备编号是:" + ByteUtil.byteArrToHexString(msg.getDevId()) + " " + "未识别读取的标签类型为:" + dconfig.getTagType());
+				logger.info("===========发送指令的设备编号是:" + ByteUtil.byteArrToHexString(msg.getDevId()) + " "
+						+ "未识别读取的标签类型为:" + dconfig.getTagType());
 			}
 
-		} else if(msg.getCommand() == 0x41){ //0x41协议用来读取标签
+		} else if (msg.getCommand() == 0x41) { // 0x41协议用来读取标签
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());
 			int tagType = deviceConfigService.findByDeviceId(deviceId).getTagType();
-			System.out.println("该指令读到的标签类型是:" + tagType);
+			logger.info("该指令读到的标签类型是:" + tagType);
 			List<DeviceTagReadVo> tags = new ArrayList<>();
-			if(tagType == 0 || tagType == 3 || tagType == 4 || tagType == 5 || tagType == 6){
+			if (tagType == 0 || tagType == 3 || tagType == 4 || tagType == 5 || tagType == 6) {
 				ITagDecoder td = new Tag0Decoder();
 				tags = td.decoder(msg);
-			} else if(tagType == 1){
+			} else if (tagType == 1) {
 				ITagDecoder td = new Tag1Decoder();
 				tags = td.decoder(msg);
-			} else if(tagType == 10){
+			} else if (tagType == 10) {
 				ITagDecoder td = new Tag10Decoder();
 				tags = td.decoder(msg);
-			} else if(tagType == 11){
+			} else if (tagType == 11) {
 				ITagDecoder td = new Tag11Decoder();
 				tags = td.decoder(msg);
-			} else if(tagType == 20){
+			} else if (tagType == 20) {
 				ITagDecoder td = new Tag20Decoder();
 				tags = td.decoder(msg);
-			} else if(tagType == 30){
+			} else if (tagType == 30) {
 				ITagDecoder td = new Tag30Decoder();
 				tags = td.decoder(msg);
-			} else if(tagType == 251){
+			} else if (tagType == 251) {
 				ITagDecoder td = new Tag251Decoder();
 				tags = td.decoder(msg);
-			} else if(tagType == 252){
+			} else if (tagType == 252) {
 				ITagDecoder td = new Tag252Decoder();
 				tags = td.decoder(msg);
-			} else if(tagType == 253){
+			} else if (tagType == 253) {
 				ITagDecoder td = new Tag253Decoder();
 				tags = td.decoder(msg);
 			}
-			
+
 			// TODO 发送tag到MQ
-			
-		} else if(msg.getCommand() == 0x42) { //0x42协议接收设备心跳
+
+		} else if (msg.getCommand() == 0x42) { // 0x42协议接收设备心跳
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());
-			
-			
-			
-			
+
 		} else {
-			System.out.println("==========未收到读取设备配置指令");
+			logger.info("==========未收到读取设备配置指令");
 		}
-		
+
 		// TODO 这里添加数量判断 linkDeviceCount
 		if (this.deviceIndex > 5 && PersonPositionResponseHandleContext.linkDeviceCount > 5) {
 

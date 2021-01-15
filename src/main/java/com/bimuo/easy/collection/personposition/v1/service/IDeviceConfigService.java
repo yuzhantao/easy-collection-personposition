@@ -1,6 +1,5 @@
 package com.bimuo.easy.collection.personposition.v1.service;
 
-import java.util.List;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
 import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
 
@@ -15,10 +14,39 @@ public interface IDeviceConfigService {
 	/**
 	 * 读取设备配置信息
 	 * @param deviceId 设备编号
-	 * @param command 发送给硬件的指令
 	 * @return 设备配置信息
 	 */
-	public DeviceConfigReadVo readConfig(String deviceId,String command);
+	public DeviceConfigReadVo readConfig(String deviceId);
+	
+	/**
+	 * 修改设备配置
+	 * @param deviceId 设备编号
+	 * @param cain1 发送增益,范围0~3
+	 * @param cain2 接收增益,范围0~31
+	 * @param airBaudrate 空中波特率,范围0~2(0:250K, 1:1M, 2:2M)
+	 * @param baudrate 串口波特率,范围0~6(4800~115200)
+	 * @param buzzType 蜂鸣器状态,范围0~1(0:关,1:开)
+	 * @param ioInput 地感值,范围0~1(0:无地感,1:有地感)
+	 * @param critical 两秒内接收到的同一个ID的次数阀值,范围0~8
+	 * @param filterTagTime 同一个ID的过滤时间,单位秒,范围0~250
+	 * @param sendInterval 两个韦根数据的发送间隔,单位0.1秒,范围0~250
+	 * @param tagType 标签类型,范围0~255
+	 * @param crcEn 设备CRC状态,范围0~1(0:取消,1:有效)
+	 * @return
+	 */
+	public DeviceConfigReadVo updateConfig(
+			String deviceId,
+			byte cain1,
+			byte cain2,
+			byte airBaudrate,
+			byte baudrate,
+			String buzzType,
+			String ioInput,
+			byte critical,
+			byte filterTagTime,
+			byte sendInterval,
+			byte tagType,
+			String crcEn);
 	
 	/**
 	 * 将设备回复的指令写入内存

@@ -20,7 +20,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.util.CharsetUtil;
 
 /**
- * 硬件数据解码
+ * 硬件回复的消息预处理(解码及规范大格式)
  * 
  * @author Pingfan
  *
