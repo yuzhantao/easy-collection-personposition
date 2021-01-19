@@ -1,8 +1,5 @@
 package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,7 +48,7 @@ public class LabelReadHandle implements IMessageHandle<PersonPositionMessage, Ob
 	public Object handle(ChannelHandlerContext ctx, PersonPositionMessage t) {
 		//将PersonPositionMessage转换为DeviceConfigReadVo
 		DeviceConfigReadVo configVo = new DeviceConfigReadVo();
-//		//把devId转为deviceId
+//		//把devId转为deviceCode
 		configVo.setDeviceId(ByteUtil.byteArrToHexString(t.getDevId()));
 //		//将data转换为list集合,再存到list<Tag>
 //		if ((t.getData().length / 5) > MAX_TAG_COUNT) {

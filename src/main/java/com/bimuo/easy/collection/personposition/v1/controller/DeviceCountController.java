@@ -23,6 +23,12 @@ public class DeviceCountController {
 	@Autowired
 	private IPersonPositionDeviceService personPositionDeviceService;
 	
+	/**
+	 * 统计在线离线设备
+	 * @param deviceState 设备状态
+	 * @return 在线离线设备的map集合
+	 * @throws Exception
+	 */
 	@RequestMapping
 	public ResponseEntity<?> countDeviceState(String deviceState) throws Exception {
 		int online = this.personPositionDeviceService.countByDeviceState("online");

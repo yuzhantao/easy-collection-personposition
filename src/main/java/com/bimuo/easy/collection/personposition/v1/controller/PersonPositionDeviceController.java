@@ -82,6 +82,8 @@ public class PersonPositionDeviceController {
 	 */
 	@PostMapping
 	public ResponseEntity<?> addDevice(@RequestBody PersonPositionDevice dev) throws Exception {
+		// TODO 参数是否和修改一样?
+		// TODO 是否需要打印日志?
 		dev.setCreateTime(new Date());
 		dev.setUpdateTime(new Date());
 		boolean isSuccess = personPositionDeviceService.insert(dev);

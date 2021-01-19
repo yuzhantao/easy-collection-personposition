@@ -1,6 +1,5 @@
 package com.bimuo.easy.collection.personposition.v1.service.impl;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
+import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigDeviceIdException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
@@ -33,6 +33,7 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 	@Override
 	public DeviceConfigReadVo readConfig(String deviceId) {
 		PersonPositionDevice ppd = this.personPositionDeviceRepository.getOneByDeviceCode(deviceId);
+		logger.info("==========【查询】设备编号【{}】配置信息成功!",deviceId);
 		return ppd.getDeviceConfig();
 	}
 
@@ -47,24 +48,38 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 	}
 
 	@Override
-	public DeviceConfigReadVo updateConfig(String deviceId, byte cain1, byte cain2, byte airBaudrate, byte baudrate,
-			String buzzType, String ioInput, byte critical, byte filterTagTime, byte sendInterval, byte tagType,
+	public DeviceConfigReadVo updateConfig(
+			String oldDeviceId,
+			String deviceId,
+			Byte cain1,
+			Byte cain2,
+			Byte airBaudrate,
+			Byte baudrate,
+			String buzzType,
+			String ioInput,
+			Byte critical,
+			Byte filterTagTime,
+			Byte sendInterval,
+			Byte tagType,
 			String crcEn) {
 		// 更新设备配置
 		DeviceConfigReadVo config = new DeviceConfigReadVo();
 		if (StringUtils.isNotBlank(deviceId)) {
 			config.setDeviceId(deviceId.toUpperCase());
+		} else {
+			config.setDeviceId(oldDeviceId.toUpperCase());
 		}
-		if (StringUtils.isNotBlank(Integer.toString(ByteUtil.byteToInt(cain1)))) {
+		
+		if (cain1 != null) {
 			config.setCain1(cain1);
 		}
-		if (StringUtils.isNotBlank(Integer.toString(ByteUtil.byteToInt(cain2)))) {
+		if ((cain2!= null)) {
 			config.setCain2(cain2);
 		}
-		if (StringUtils.isNotBlank(Integer.toString(ByteUtil.byteToInt(airBaudrate)))) {
+		if ((airBaudrate != null)) {
 			config.setAirBaudrate(airBaudrate);
 		}
-		if (StringUtils.isNotBlank(Integer.toString(ByteUtil.byteToInt(baudrate)))) {
+		if ((baudrate!= null)) {
 			config.setBaudrate(baudrate);
 		}
 		if (StringUtils.isNotBlank(buzzType)) {
@@ -85,16 +100,16 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 				config.setIoInput("未读取到地感值");
 			};
 		}
-		if (StringUtils.isNotBlank(Integer.toString(ByteUtil.byteToInt(critical)))) {
+		if ((critical!= null)) {
 			config.setCritical(critical);
 		}
-		if (StringUtils.isNotBlank(Integer.toString(ByteUtil.byteToInt(filterTagTime)))) {
+		if ((filterTagTime!= null)) {
 			config.setFilterTagTime(filterTagTime);
 		}
-		if (StringUtils.isNotBlank(Integer.toString(ByteUtil.byteToInt(sendInterval)))) {
+		if ((sendInterval != null)) {
 			config.setSendInterval(sendInterval);
 		}
-		if (StringUtils.isNotBlank(Integer.toString(ByteUtil.byteToInt(tagType)))) {
+		if ((tagType != null)) {
 			config.setTagType(tagType);
 		}
 		if (StringUtils.isNotBlank(crcEn)) {
@@ -107,28 +122,25 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			};
 		}
 		
-		// TODO 怎么直接存配置信息???
+		PersonPositionDevice dev = this.personPositionDeviceRepository.getOneByDeviceCode(oldDeviceId);
 		
-		
-		// 修改需要查询,数据库有直接更新,没有则添加一条新的设备信息
-		PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(deviceId);
-		if (dev != null) {
-			dev.setDeviceState("online");
-			dev.setUpdateTime(new Date());
+		if(StringUtils.isNotBlank(deviceId)) {
+			dev.setDeviceCode(deviceId.toUpperCase());
+		}
+		if(config != null) {
 			dev.setDeviceConfig(config);
-			this.personPositionDeviceService.modify(dev);
-			logger.info("==========数据库设备信息更新成功!");
+		}
+		
+		personPositionDeviceService.modify(dev);
+		// 注意String存的是地址,用equals判断值是否相同
+		if(dev.getDeviceCode().equals(dev.getDeviceConfig().getDeviceId())) {
+			logger.info("==========【修改】设备编号【{}】配置信息成功!",dev.getDeviceCode());
 		} else {
-			PersonPositionDevice newDevice = new PersonPositionDevice();
-			newDevice.setDeviceCode(deviceId.toUpperCase());
-			newDevice.setDeviceState("online");
-			newDevice.setCreateTime(new Date());
-			newDevice.setUpdateTime(new Date());
-			newDevice.setDeviceType("人员定位设备");
-			newDevice.setDeviceConfig(config);
-			personPositionDeviceService.insert(newDevice);
-			logger.info("==========数据库新添加设备信息成功!");
-		} 
+			logger.error("==========【修改】设备编号【{}】配置信息失败!设备编号【{}】与配置中编号【{}】不一致!",
+					dev.getDeviceCode(),dev.getDeviceCode(),dev.getDeviceConfig().getDeviceId());
+			new DeviceConfigDeviceIdException();
+		}
+		
 		return config;
 	}
 }

@@ -35,17 +35,18 @@ public interface IDeviceConfigService {
 	 * @return
 	 */
 	public DeviceConfigReadVo updateConfig(
+			String oldDeviceId,
 			String deviceId,
-			byte cain1,
-			byte cain2,
-			byte airBaudrate,
-			byte baudrate,
+			Byte cain1,
+			Byte cain2,
+			Byte airBaudrate,
+			Byte baudrate,
 			String buzzType,
 			String ioInput,
-			byte critical,
-			byte filterTagTime,
-			byte sendInterval,
-			byte tagType,
+			Byte critical,
+			Byte filterTagTime,
+			Byte sendInterval,
+			Byte tagType,
 			String crcEn);
 	
 	/**

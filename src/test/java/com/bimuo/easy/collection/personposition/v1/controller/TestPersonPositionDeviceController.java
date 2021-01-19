@@ -69,7 +69,7 @@ public class TestPersonPositionDeviceController {
 				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk()).andReturn();
 		String retJson = mr.getResponse().getContentAsString();
 		PersonPositionDevice ret = JSON.parseObject(retJson, PersonPositionDevice.class);
-      Assert.assertNotNull(ret.getId());
+		Assert.assertNotNull(ret.getId());
 	}
 	
 	/**

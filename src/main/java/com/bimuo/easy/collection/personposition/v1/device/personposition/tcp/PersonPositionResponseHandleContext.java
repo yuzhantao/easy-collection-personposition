@@ -32,10 +32,6 @@ import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDevice
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
 import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -171,8 +167,9 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			logger.info("==========设备回复指令的协议是:" + msg.getCommand() + " " + "Data段是:" + ByteUtil.byteArrToHexString(data));
 			
 			// 1.处理设备配置信息
-			// 更新数据库配置信息,内含设备编号的判空以及设备信息的处理
+			// 更新数据库配置信息,连接读取配置时设备编号既是旧编号也是新编号
 			DeviceConfigReadVo dconfig = deviceConfigService.updateConfig(
+					ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase(),
 					ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase(), // 设备id,回复的消息msg和Data[]段都有,msg取较方便
 					data[2], data[3], data[4], data[5], 
 					Byte.toString(data[6]), 
@@ -181,32 +178,30 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 					data[11], // 标签类型,11是硬件回复44协议Data[]段的11字节,后根据此字段读取标签类型
 					Byte.toString(data[12]));
 			
-			// 2.处理设备信息,下述逻辑在deviceConfigService实现(除ip地址)
+			// 2.处理设备信息
 			// 一旦设备连接,查到设备则更新设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
 			// TODO 处理逻辑需讨论
 			PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-			dev.setIp(ip);
-			personPositionDeviceService.modify(dev);
 			logger.info("==========连接的设备编号是{}", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-//			if (dev != null) {
-//				dev.setDeviceState("online");
-//				dev.setIp(ip);
-//				dev.setUpdateTime(new Date());
-//			dev.setDeviceConfig(dconfig);
-//				personPositionDeviceService.modify(dev);
-//				logger.info("数据库设备信息更新成功!");
-//			} else {
-//				PersonPositionDevice newDevice = new PersonPositionDevice();
-//				newDevice.setDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-//				newDevice.setDeviceState("online");
-//				newDevice.setCreateTime(new Date());
-//				newDevice.setUpdateTime(new Date());
-//				newDevice.setDeviceType("人员定位设备");
-//				newDevice.setIp(ip);
-//				newDevice.setDeviceConfig(dconfig);
-//				personPositionDeviceService.insert(newDevice);
-//				logger.info("数据库新添加设备信息成功!");
-//			}
+			if (dev != null) {
+				dev.setDeviceState("online");
+				dev.setIp(ip);
+				dev.setUpdateTime(new Date());
+				dev.setDeviceConfig(dconfig);
+				personPositionDeviceService.modify(dev);
+				logger.info("==========数据库设备信息更新成功!");
+			} else {
+				PersonPositionDevice newDevice = new PersonPositionDevice();
+				newDevice.setDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+				newDevice.setDeviceState("online");
+				newDevice.setCreateTime(new Date());
+				newDevice.setUpdateTime(new Date());
+				newDevice.setDeviceType("人员定位设备");
+				newDevice.setIp(ip);
+				newDevice.setDeviceConfig(dconfig);
+				personPositionDeviceService.insert(newDevice);
+				logger.info("==========数据库添加新设备成功!");
+			}
 
 			// 2.将配置类放入内存
 			deviceConfigService.addMemory(msg, dconfig);
@@ -254,7 +249,9 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			}
 
 			// TODO 发送tag到MQ
-
+			
+			
+			
 		} else if (msg.getCommand() == 0x42) { // 0x42协议接收设备心跳
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());
 

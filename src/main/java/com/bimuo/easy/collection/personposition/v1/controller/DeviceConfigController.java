@@ -1,9 +1,7 @@
 package com.bimuo.easy.collection.personposition.v1.controller;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,8 +25,7 @@ import com.google.common.base.Preconditions;
  *
  */
 @RestController
-@EnableAsync // 异步处理
-@RequestMapping("/device-config")
+@RequestMapping("/devices")
 public class DeviceConfigController {
 	
 	@Autowired
@@ -43,7 +40,7 @@ public class DeviceConfigController {
 	 * @return 设备配置实体
 	 * @throws Exception
 	 */
-	@GetMapping("/{deviceId}")
+	@GetMapping("/{deviceId}/config")
 	public ResponseEntity<?> queryDeviceConfig(@PathVariable String deviceId) throws Exception{
 		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
 		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
@@ -68,24 +65,23 @@ public class DeviceConfigController {
 	 * @return 设备配置实体
 	 * @throws Exception
 	 */
-	@PutMapping(value = "/{oldDeviceId}")
+	@PutMapping(value = "/{oldDeviceId}/config")
 	public ResponseEntity<?> updateDeviceConfig(@PathVariable("oldDeviceId") String oldDeviceId,
 			@RequestParam(required=false) String deviceId,
-			@RequestParam(required=false) String cain1, // Spring接受参数的时候,基本数据类型需要改为包装类,或添加defaultValue,只加required=false是没用的
-			@RequestParam(required=false) String cain2,
-			@RequestParam(required=false) String airBaudrate,
-			@RequestParam(required=false) String baudrate,
+			@RequestParam(required=false) Byte cain1, // Spring接受参数的时候,基本数据类型需要改为包装类,或添加defaultValue,只加required=false是没用的
+			@RequestParam(required=false) Byte cain2,
+			@RequestParam(required=false) Byte airBaudrate,
+			@RequestParam(required=false) Byte baudrate,
 			@RequestParam(required=false) String buzzType,
 			@RequestParam(required=false) String ioInput,
-			@RequestParam(required=false) String critical,
-			@RequestParam(required=false) String filterTagTime,
-			@RequestParam(required=false) String sendInterval,
-			@RequestParam(required=false) String tagType,
+			@RequestParam(required=false) Byte critical,
+			@RequestParam(required=false) Byte filterTagTime,
+			@RequestParam(required=false) Byte sendInterval,
+			@RequestParam(required=false) Byte tagType,
 			@RequestParam(required=false) String crcEn) throws Exception {
 		PersonPositionDevice dev = this.personPositionDeviceService.getOneByDeviceCode(oldDeviceId); // 修改需要先查询
 		Preconditions.checkArgument(dev != null,new DeviceCodeNoneException());
-		DeviceConfigReadVo config = deviceConfigService.updateConfig(deviceId, Byte.parseByte(cain1), Byte.parseByte(cain2), Byte.parseByte(airBaudrate), Byte.parseByte(baudrate), buzzType, ioInput, Byte.parseByte(critical), Byte.parseByte(filterTagTime), Byte.parseByte(sendInterval), Byte.parseByte(tagType), crcEn);
-		// TODO 为什么null没有报异常
+		DeviceConfigReadVo config = deviceConfigService.updateConfig(oldDeviceId, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType, ioInput, critical, filterTagTime, sendInterval, tagType, crcEn);
 		Preconditions.checkArgument(config != null,new DeviceConfigUpdateFailedException());
 		return ResponseEntity.ok(config);
 	}

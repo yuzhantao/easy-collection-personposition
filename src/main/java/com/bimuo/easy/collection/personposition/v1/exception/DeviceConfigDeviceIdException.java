@@ -4,12 +4,12 @@ import com.bimuo.easy.collection.personposition.core.http.BusinessException;
 import com.bimuo.easy.collection.personposition.core.http.ResponseStatus;
 
 /**
- * 数据库修改设备配置失败
+ * 设备编号与配置中不一致
  * 
  * @author Pingfan
  *
  */
-@ResponseStatus(value = 609, reason = "数据库修改设备配置失败!")
-public class DeviceConfigUpdateFailedException extends BusinessException {
+@ResponseStatus(value = 610, reason = "设备编号与配置中不一致!")
+public class DeviceConfigDeviceIdException extends BusinessException {
 	private static final long serialVersionUID = 1L;
 }
