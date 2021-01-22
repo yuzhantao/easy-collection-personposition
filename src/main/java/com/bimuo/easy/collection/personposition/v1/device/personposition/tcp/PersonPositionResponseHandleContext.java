@@ -3,7 +3,11 @@ package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.MDC;
@@ -30,6 +34,8 @@ import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.DeviceConfigResponseMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -157,12 +163,31 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	@NotProguard
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PersonPositionMessage msg) throws Exception {
+		// 取硬件ip地址
 		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 		String ip = insocket.getAddress().getHostAddress();
-
+		
+		// 添加管道并记录在code-channel映射表,以备修改硬件配置时,根据设备编号查询管道
+		// 需要判断连接的设备编号是否在映射表中
+		if(CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase()) != null) {
+			CodeMapping.getInstance().addChannel(ctx.channel());
+			CodeMapping.getInstance().addChannelMapping(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(), ctx.channel());
+		}
+		
 		byte[] data = msg.getData(); // 接收设备完整回复的指令
 		byte[] deviceIdArray = msg.getDevId(); // 单独复制设备编号指令段以便查询,从而修改状态,deviceId两字节
 
+		if(msg.getCommand() == 0x43) { // 0x43协议用来修改设备配置
+			// 设置成功则设备回复:Data[] = 'OK(4F4B)',失败没反应,CheckSum为任意值
+			if(ByteUtil.byteArrToHexString(data).equals("4F4B")) {
+				// 使用map记录修改的配置编号,以备修改配置的Controller读取设备回复的消息
+				DeviceConfigResponseMapping.getInstance().addResponseMapping(ByteUtil.byteArrToHexString(deviceIdArray), "修改硬件配置成功");
+			} else {
+				logger.error("设备编号【{}】配置修改失败! Data段是【{}】",ByteUtil.byteArrToHexString(deviceIdArray),ByteUtil.byteArrToHexString(data));
+			}
+			
+		}
+		
 		if (msg.getCommand() == 0x44) { // 0x44协议用来读取设备配置
 			logger.info("==========设备回复指令的协议是:" + msg.getCommand() + " " + "Data段是:" + ByteUtil.byteArrToHexString(data));
 			
@@ -179,8 +204,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 					Byte.toString(data[12]));
 			
 			// 2.处理设备信息
-			// 一旦设备连接,查到设备则更新设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
-			// TODO 处理逻辑需讨论
+			// 一旦设备连接,查到设备则更新数据库设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
 			PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
 			logger.info("==========连接的设备编号是{}", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
 			if (dev != null) {

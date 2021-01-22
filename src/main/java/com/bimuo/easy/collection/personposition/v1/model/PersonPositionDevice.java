@@ -2,8 +2,6 @@ package com.bimuo.easy.collection.personposition.v1.model;
 
 
 import java.util.Date;
-import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,7 +17,6 @@ import org.springframework.data.annotation.CreatedDate;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 /**
@@ -76,9 +73,17 @@ public class PersonPositionDevice {
 	@Temporal(TemporalType.DATE)
 	private Date updateTime;
 	
+	/**
+	 * 设备配置
+	 */
 	@Type(type = "json")
 	@Column(columnDefinition = "json")
 	private DeviceConfigReadVo deviceConfig;
+	
+	/**
+	 * 备注(数据库记录是否有效)
+	 */
+	private String description;
 
 	public String getId() {
 		return id;
@@ -143,5 +148,11 @@ public class PersonPositionDevice {
 	public void setDeviceConfig(DeviceConfigReadVo deviceConfig) {
 		this.deviceConfig = deviceConfig;
 	}
+	public String getDescription() {
+		return description;
+	}
 
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }

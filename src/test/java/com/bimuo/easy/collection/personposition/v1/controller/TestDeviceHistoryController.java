@@ -66,8 +66,26 @@ public class TestDeviceHistoryController {
 		String str = "2021-1-11";
 		startTime = format.parse(str);
 		String json = JSON.toJSONString(startTime);
+		// TODO 怎么传时间
 		MvcResult mr = mockMvc.perform(
 				MockMvcRequestBuilders.get("/devices-history").contentType(MediaType.APPLICATION_JSON_UTF8).content(json))
+				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk()).andReturn();
+		String retJson = mr.getResponse().getContentAsString();
+        Assert.assertNotNull(retJson);
+	}
+	
+	/**
+	 * 测试导出Excel
+	 * @throws Exception
+	 */
+	@SuppressWarnings("deprecation")
+	@Test
+	@Transactional
+	@Rollback(true)
+	public void testExportExcel() throws Exception {
+		// TODO 怎么传参数
+		MvcResult mr = mockMvc.perform(
+				MockMvcRequestBuilders.get("/devices-history/exportExcel").contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk()).andReturn();
 		String retJson = mr.getResponse().getContentAsString();
         Assert.assertNotNull(retJson);
