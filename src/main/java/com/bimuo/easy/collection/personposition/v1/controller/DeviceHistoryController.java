@@ -1,11 +1,13 @@
 package com.bimuo.easy.collection.personposition.v1.controller;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -14,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,13 +53,22 @@ public class DeviceHistoryController {
 	@GetMapping
 	public Page<PersonPositionDevice> queryDeviceHistoryList(
 			@RequestParam(required=false) 
-			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-			Date startTime,
+			String startTime,
 			@RequestParam(required=false) 
-			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-			Date endTime,
+			String endTime,
 			@PageableDefault(value = 10, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
-		return personPositionDeviceService.queryHistory(startTime,endTime,pageable);
+		
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date realStartTime = null;
+		Date realEndTime = null;
+		if(StringUtils.isNotBlank(startTime)) {
+			realStartTime = simpleDateFormat.parse(startTime);	
+		}
+		if(StringUtils.isNotBlank(endTime)) {
+			realEndTime = simpleDateFormat.parse(endTime);
+		}
+		
+		return personPositionDeviceService.queryHistory(realStartTime,realEndTime,pageable);
 	}
 	
 	/**
@@ -70,16 +80,21 @@ public class DeviceHistoryController {
 	 */
 	@GetMapping("/exportExcel")
 	public void exportExcel(
-			@RequestParam(required=false) 
-			@DateTimeFormat(pattern = "yyyy-MM-dd")
-			Date startTime,
-			@RequestParam(required=false) 
-			@DateTimeFormat(pattern = "yyyy-MM-dd")
-			Date endTime,
+			@RequestParam(required=false) String startTime,
+			@RequestParam(required=false) String endTime,
 			HttpServletResponse response) throws Exception {
 		log.info("Excel 导出开始......");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date realStartTime = null;
+		Date realEndTime = null;
+		if(StringUtils.isNotBlank(startTime)) {
+			realStartTime = simpleDateFormat.parse(startTime);	
+		}
+		if(StringUtils.isNotBlank(endTime)) {
+			realEndTime = simpleDateFormat.parse(endTime);
+		}
 		// 获取用户信息
-		List<BrandInfo> list = personPositionDeviceService.toExcel(startTime,endTime);
+		List<BrandInfo> list = personPositionDeviceService.toExcel(realStartTime,realEndTime);
 		try {
 			// 设置响应输出的头类型及下载文件的默认名称
 			String fileName = new String("设备历史信息表.xls".getBytes("utf-8"), "ISO-8859-1");

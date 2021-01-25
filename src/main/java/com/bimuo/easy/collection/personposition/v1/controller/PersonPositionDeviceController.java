@@ -51,7 +51,7 @@ public class PersonPositionDeviceController {
 	 * @return 查询的设备列表
 	 * @throws Exception
 	 */
-	@GetMapping
+	@GetMapping(value="/list")
 	public Page<PersonPositionDevice> queryDeviceList(
 			@RequestParam(required=false) String deviceState,
 			@RequestParam(required=false) String deviceCode,
@@ -101,7 +101,7 @@ public class PersonPositionDeviceController {
 	public ResponseEntity<?> deleteDevice(@PathVariable String deviceCode) throws Exception {
 		boolean isSuccess = personPositionDeviceService.delete(deviceCode);
 		Preconditions.checkArgument(isSuccess,new DeviceDeleteFailedException());
-		return ResponseEntity.ok(deviceCode);
+		return ResponseEntity.ok("删除的设备编号是:"+deviceCode);
 	}
 	
 	/**

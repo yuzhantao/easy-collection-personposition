@@ -7,9 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -62,7 +59,6 @@ public class PersonPositionDevice {
 	 */
 	@CreatedDate
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	@Temporal(TemporalType.DATE)
 	private Date createTime;
 	
 	/**
@@ -70,7 +66,6 @@ public class PersonPositionDevice {
 	 */
 	@CreatedDate
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	@Temporal(TemporalType.DATE)
 	private Date updateTime;
 	
 	/**

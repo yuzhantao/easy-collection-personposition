@@ -88,7 +88,6 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 	@Override
 	public Page<PersonPositionDevice> queryHistory(Date startTime, Date endTime, Pageable pageable) {
 		Specification<PersonPositionDevice> specification = new Specification<PersonPositionDevice>() {
-
 			private static final long serialVersionUID = 1L;
 			
 			@Override
@@ -115,7 +114,6 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 	@Override
 	public List<PersonPositionDevice> queryHistoryList(Date startTime, Date endTime) {
 		Specification<PersonPositionDevice> specification = new Specification<PersonPositionDevice>() {
-
 			private static final long serialVersionUID = 1L;
 			
 			@Override

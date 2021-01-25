@@ -9,7 +9,7 @@ import com.bimuo.easy.collection.personposition.core.http.ResponseStatus;
  * @author yuzhantao
  *
  */
-@ResponseStatus(value = 601, reason = "设备编号已存在!")
+@ResponseStatus(value = 601, reason = "数据库已存在该设备编号!")
 public class DeviceCodeAlreadyExistsException extends BusinessException {
 	private static final long serialVersionUID = 1L;
 }
