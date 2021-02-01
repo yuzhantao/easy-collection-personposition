@@ -67,7 +67,7 @@ dependencies {
 	compile project (path:':easy-license-core', configuration:'default')
 	//implementation 'org.reflections:reflections:0.9.12'
 	//implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-	implementation 'com.bug-cloud:bugcloud-junit-core:0.0.1-RELEASE'
+	testImplementation 'com.bug-cloud:bugcloud-junit-core:0.0.2'
 }
 
 configurations.all {

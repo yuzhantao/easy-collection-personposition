@@ -7,7 +7,7 @@ import cn.afterturn.easypoi.excel.annotation.Excel;
 import lombok.Data;
 
 /**
- * 使用easypoi导出excel映射实体注解
+ * 使用easypoi导出excel映射设备实体注解
  * 
  * @author Pingfan
  *

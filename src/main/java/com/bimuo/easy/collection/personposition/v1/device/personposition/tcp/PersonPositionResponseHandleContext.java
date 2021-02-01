@@ -277,7 +277,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			}
 
 			// TODO 发送tag到MQ
-			tagHistoryService.save(th);
+			//tagHistoryService.save(th);
 			
 		} else if (msg.getCommand() == 0x42) { // 0x42协议接收设备心跳
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());

@@ -1,6 +1,5 @@
 package com.bimuo.easy.collection.personposition.v1.service;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -45,7 +44,6 @@ public interface IPersonPositionDeviceService {
 	 * @return
 	 */
 	List<PersonPositionDevice> queryHistoryList(Date startTime,Date endTime);
-	
 	
 	/**
 	 * 根据设备编号查询单个设备

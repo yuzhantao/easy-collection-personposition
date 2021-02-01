@@ -5,12 +5,12 @@ import java.util.UUID;
 import org.junit.runner.RunWith;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.bugcloud.junit.core.BugCloudAutoSpringRunner;
+import com.bugcloud.junit.core.BugCloudAutoSpringSuite;
 import com.bugcloud.junit.core.annotation.AutoTestScan;
 import com.bugcloud.junit.core.annotation.PushReport;
 import com.bugcloud.junit.core.annotation.RandomParameter;
 
-@RunWith(BugCloudAutoSpringRunner.class)
+@RunWith(BugCloudAutoSpringSuite.class)
 @AutoTestScan(packageName = "com.bimuo.easy.collection.personposition")
 @PushReport(appKey = "6585667c-6f18-4c4f-b809-3be1de3b3ca7", appSecret = "fce8d3b5-6c9b-4a49-a50b-ad519630c898", pusher = "yu", handler = "张三")
 @Transactional
