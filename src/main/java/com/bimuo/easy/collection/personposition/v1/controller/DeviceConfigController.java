@@ -1,11 +1,5 @@
 package com.bimuo.easy.collection.personposition.v1.controller;
 
-import java.util.Date;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeNoneException;
+import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigAllParamNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigUpdateFailedException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
@@ -25,7 +20,6 @@ import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDevice
 import com.bimuo.easy.collection.personposition.v1.service.util.DeviceConfigResponseMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * 读取修改设备配置控制器
@@ -84,12 +78,23 @@ public class DeviceConfigController {
 			@RequestParam(required = false) Byte filterTagTime, @RequestParam(required = false) Byte sendInterval,
 			@RequestParam(required = false) Byte tagType, @RequestParam(required = false) String crcEn)
 			throws Exception {
-		// 1.修改硬件配置
+		// 1.先判断参数是否全空,是则停止修改报异常
+		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId) && cain1 != null && cain2 != null && airBaudrate != null && 
+				baudrate != null && StringUtils.isNotBlank(buzzType) && StringUtils.isNotBlank(ioInput) && critical != null && 
+				filterTagTime != null && sendInterval != null && tagType != null && StringUtils.isNotBlank(crcEn),
+				new DeviceConfigAllParamNoneException());
+		
+		// 2.修改硬件配置
 		deviceConfigService.updateHardwareConfig(oldDeviceId, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType,
 				ioInput, critical, filterTagTime, sendInterval, tagType, crcEn);
 
-		// 2.开线程轮询设备回复的消息记录表,map中没有设备编号或者超时就停止轮询
-		String findCode = oldDeviceId.equals(deviceId) ? oldDeviceId : deviceId;
+		// 3.开线程轮询设备回复的消息记录表,map中没有设备编号或者超时就停止轮询
+		String findCode = new String();
+		if(StringUtils.isNotBlank(deviceId)) {
+			findCode = oldDeviceId.equals(deviceId) ? oldDeviceId : deviceId;
+		} else {
+			findCode = oldDeviceId;
+		}
 		long startTime = System.currentTimeMillis();
 		while (true) {
 			Thread.sleep(1000);
@@ -99,7 +104,7 @@ public class DeviceConfigController {
 				continue; // break会跳出整个while,应该用continue
 			} else {
 				DeviceConfigResponseMapping.getInstance().removeResponseMapping(findCode); // 找到后删除该编号map记录
-				// 3.修改数据库中对应硬件配置
+				// 4.修改数据库中对应硬件配置
 				PersonPositionDevice dev = this.personPositionDeviceService.getOneByDeviceCode(oldDeviceId); // 修改需要先查询
 				Preconditions.checkArgument(dev != null, new DeviceCodeNoneException());
 				DeviceConfigReadVo config = deviceConfigService.updateConfig(oldDeviceId, deviceId, cain1, cain2,

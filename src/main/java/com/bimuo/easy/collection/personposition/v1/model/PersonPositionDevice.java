@@ -76,9 +76,9 @@ public class PersonPositionDevice {
 	private DeviceConfigReadVo deviceConfig;
 	
 	/**
-	 * 备注(数据库记录是否有效)
+	 * 记录是否有效
 	 */
-	private String description;
+	private boolean isEffective;
 
 	public String getId() {
 		return id;
@@ -143,11 +143,13 @@ public class PersonPositionDevice {
 	public void setDeviceConfig(DeviceConfigReadVo deviceConfig) {
 		this.deviceConfig = deviceConfig;
 	}
-	public String getDescription() {
-		return description;
+
+	public boolean isEffective() {
+		return isEffective;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setEffective(boolean isEffective) {
+		this.isEffective = isEffective;
 	}
+	
 }

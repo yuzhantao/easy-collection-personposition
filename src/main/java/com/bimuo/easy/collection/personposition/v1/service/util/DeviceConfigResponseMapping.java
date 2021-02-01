@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 记录修改硬件配置后设备回复的信息
+ * 记录修改硬件配置后设备回复的信息(Context用)
  * 
  * @author Pingfan
  *
