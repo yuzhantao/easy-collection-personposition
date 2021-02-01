@@ -7,6 +7,7 @@ import com.bimuo.easy.collection.personposition.core.message.IMessageHandleFacto
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.coder.PersonPositionDecoder;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
+import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
 
 import io.netty.channel.ChannelHandler;
@@ -22,6 +23,9 @@ public class PersonPositionMessageHandleFactory implements IMessageHandleFactory
 	@Autowired
 	IPersonPositionDeviceService personPositionDeviceService;
 	
+	@Autowired
+	ITagHistoryService tagHistoryService;
+	
 	@Override
 	public ChannelHandler createMessageDecoder() {
 		return new PersonPositionDecoder(Integer.MAX_VALUE, 6, 2, 2, 0, true);
@@ -29,7 +33,7 @@ public class PersonPositionMessageHandleFactory implements IMessageHandleFactory
 
 	@Override
 	public ChannelHandler createMessageHandle() {
-		return new PersonPositionResponseHandleContext(personPositionEventBusService,deviceCodeService,personPositionDeviceService);
+		return new PersonPositionResponseHandleContext(personPositionEventBusService,deviceCodeService,personPositionDeviceService,tagHistoryService);
 	}
 
 }

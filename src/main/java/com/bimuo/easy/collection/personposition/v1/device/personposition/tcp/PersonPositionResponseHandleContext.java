@@ -3,11 +3,8 @@ package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.MDC;
@@ -33,6 +30,7 @@ import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.res
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
+import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
 import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
 import com.bimuo.easy.collection.personposition.v1.service.util.DeviceConfigResponseMapping;
@@ -51,12 +49,14 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	
 	private static int linkDeviceCount = 0; // 设备总数量
 	private int deviceIndex; // 设备索引号
+	private ITagHistoryService tagHistoryService;
 	
-	public PersonPositionResponseHandleContext(PersonPositionEventBusService personPositionEventBusService, IDeviceConfigService deviceConfigService, IPersonPositionDeviceService personPositionDeviceService) {
+	public PersonPositionResponseHandleContext(PersonPositionEventBusService personPositionEventBusService, IDeviceConfigService deviceConfigService, IPersonPositionDeviceService personPositionDeviceService,ITagHistoryService tagHistoryService) {
 		super();
 		this.personPositionEventBusService = personPositionEventBusService;
 		this.deviceConfigService = deviceConfigService;
 		this.personPositionDeviceService = personPositionDeviceService;
+		this.tagHistoryService = tagHistoryService;
 		this.messageHandleContent = new MessageHandleContext<>();
 //		this.messageHandleContent.setOnlyHandle(false);
 //		
@@ -273,8 +273,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			}
 
 			// TODO 发送tag到MQ
-			
-			
+			tagHistoryService.save(th);
 			
 		} else if (msg.getCommand() == 0x42) { // 0x42协议接收设备心跳
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());
