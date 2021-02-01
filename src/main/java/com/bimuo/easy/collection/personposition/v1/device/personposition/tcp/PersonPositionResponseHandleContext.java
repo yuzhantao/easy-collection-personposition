@@ -169,9 +169,12 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		
 		// 添加管道并记录在code-channel映射表,以备修改硬件配置时,根据设备编号查询管道
 		// 需要判断连接的设备编号是否在映射表中
-		if(CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase()) != null) {
+		if(CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase()) == null) {
 			CodeMapping.getInstance().addChannel(ctx.channel());
 			CodeMapping.getInstance().addChannelMapping(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(), ctx.channel());
+			logger.info("新添加code-channel映射,设备编号={},管道={}",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),ctx.channel());
+		} else {
+			logger.info("code-channel表中存在该映射,设备编号={},管道={}",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase()));
 		}
 		
 		byte[] data = msg.getData(); // 接收设备完整回复的指令
@@ -180,10 +183,11 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		if(msg.getCommand() == 0x43) { // 0x43协议用来修改设备配置
 			// 设置成功则设备回复:Data[] = 'OK(4F4B)',失败没反应,CheckSum为任意值
 			if(ByteUtil.byteArrToHexString(data).equals("4F4B")) {
-				// 使用map记录修改的配置编号,以备修改配置的Controller读取设备回复的消息
+				// 使用map记录修改配置后的编号,以备修改配置的Controller读取设备回复的消息
 				DeviceConfigResponseMapping.getInstance().addResponseMapping(ByteUtil.byteArrToHexString(deviceIdArray), "修改硬件配置成功");
+				logger.info("设备编号【{}】修改硬件配置成功!",ByteUtil.byteArrToHexString(deviceIdArray));
 			} else {
-				logger.error("设备编号【{}】配置修改失败! Data段是【{}】",ByteUtil.byteArrToHexString(deviceIdArray),ByteUtil.byteArrToHexString(data));
+				logger.error("设备编号【{}】修改硬件配置失败! Data段是【{}】",ByteUtil.byteArrToHexString(deviceIdArray),ByteUtil.byteArrToHexString(data));
 			}
 			
 		}

@@ -10,7 +10,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
 /**
- * 编号映射类,用于根据设备编号查询对应管道
+ * 编号映射类,用于根据设备编号查询对应管道(Service用)
  * 
  * @author Pingfan
  *
@@ -46,6 +46,9 @@ public class CodeMapping {
 	 * @return
 	 */
 	public Channel getChannel(String mappingKey) {
+		if(this.codeMappingList.get(mappingKey) == null) {
+			return null;
+		}
 		return this.channels.find(this.codeMappingList.get(mappingKey));
 	}
 	
@@ -82,6 +85,19 @@ public class CodeMapping {
 	public Channel removeChannelMapping(String key) {
 		Channel channel = getChannel(key);
 		this.codeMappingList.remove(key);
+		return channel;
+	}
+	
+	/**
+	 * 修改管道映射
+	 * @param oldKey 管道对应的旧关键字,此类中指旧设备编号
+	 * @param newKey 管道对应的新关键字,此类中指新设备编号
+	 * @return
+	 */
+	public Channel updateChannelMapping(String oldKey,String newKey){
+		Channel channel = getChannel(oldKey);
+		this.codeMappingList.put(newKey, channel.id());
+		this.codeMappingList.remove(oldKey);
 		return channel;
 	}
 	
