@@ -56,7 +56,7 @@ public class TagHistoryController {
 	 * @throws Exception
 	 */
 	@GetMapping("/list")
-	public Page<TagHistory> queryTagHistoryList(
+	public ResponseEntity<?> queryTagHistoryList(
 			@RequestParam(required=false) 
 			String[] deviceCode,
 			@RequestParam(required=false) 
@@ -75,7 +75,8 @@ public class TagHistoryController {
 			realEndTime = simpleDateFormat.parse(endTime);
 		}
 		
-		return tagHistoryService.queryTagHistory(deviceCode,realStartTime,realEndTime,pageable);
+		Page<TagHistory> page = tagHistoryService.queryTagHistory(deviceCode,realStartTime,realEndTime,pageable);
+		return ResponseEntity.ok(page);
 	}
 	
 	
