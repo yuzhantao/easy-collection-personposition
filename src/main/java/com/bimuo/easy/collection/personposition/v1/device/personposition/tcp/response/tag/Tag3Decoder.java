@@ -36,7 +36,7 @@ public class Tag3Decoder implements ITagDecoder<Tag3Vo> {
 			String bTag = ByteUtil.intToBinary(rTagId);
 			log.info("标签3的二进制为:{}(前两位保留位为0则不显示)",bTag);
 			// 解tagId,3字节
-			tag3.setTagID(rTagId);
+			tag3.setTagId(rTagId);
 			tags.add(tag3);
 			log.info("第{}个标签3的tagId={}",i,bTag);
 		}

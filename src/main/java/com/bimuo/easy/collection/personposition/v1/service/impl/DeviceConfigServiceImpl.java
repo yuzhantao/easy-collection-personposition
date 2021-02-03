@@ -171,9 +171,9 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			oldDevice.setDeviceConfig(config);
 			personPositionDeviceService.modify(oldDevice);
 			if(oldDevice.getDeviceCode().equals(oldDevice.getDeviceConfig().getDeviceId())) {
-				logger.info("==========【修改】设备编号【{}】配置信息成功!",oldDevice.getDeviceCode());
+				logger.info("==========数据库【修改】设备编号【{}】配置信息成功!",oldDevice.getDeviceCode());
 			} else {
-				logger.error("==========【修改】设备编号【{}】配置信息失败!设备编号【{}】与配置中编号【{}】不一致!",
+				logger.error("==========数据库【修改】设备编号【{}】配置信息失败!设备编号【{}】与配置中编号【{}】不一致!",
 						oldDevice.getDeviceCode(),
 						oldDevice.getDeviceCode(),
 						oldDevice.getDeviceConfig().getDeviceId());
@@ -192,6 +192,8 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 				newDevice.setDeviceState(oldDevice.getDeviceState());
 				setDeviceProperty(config,deviceId,cain1,cain2,airBaudrate,baudrate,
 						buzzType,ioInput,critical,filterTagTime,sendInterval,tagType,crcEn);
+				newDevice.setDeviceConfig(config);
+				newDevice.setEffective(true);
 				// 添加新设备的记录
 				personPositionDeviceService.insert(newDevice);
 				// 注意String存的是地址,用equals判断值是否相同
@@ -266,9 +268,11 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 		dataArr[13] = 0x00; // Reserver保留位 1字节
 		
 		// 拼接发送给硬件的指令command
-		String dataStr = ByteUtil.byteArrToHexString(dataArr);
-		byte data = ByteUtil.intToByte(ByteUtil.hexStringToInt(dataStr));
-		byte[] command = {0x02,0x03,0x04,0x05,0x00,0x15,0x00,0x58,0x43,0x00,data,(byte) 0xB4};
+		byte[] command = {0x02,0x03,0x04,0x05,0x00,0x15,0x00,0x58,0x43,0x00,
+				0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+				(byte) 0xB4};
+		System.arraycopy(dataArr, 0, command, 10, 14);
+		logger.info("向硬件发送的修改配置指令是{}",command);
 		
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(oldDeviceId);

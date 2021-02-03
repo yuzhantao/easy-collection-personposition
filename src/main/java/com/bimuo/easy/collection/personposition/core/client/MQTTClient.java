@@ -99,7 +99,7 @@ public class MQTTClient implements MqttCallback, MqttCallbackExtended {
 			client.connect(mqttConnectOptions);
 		}
 		this.isClose = false;
-		LOGGER.info("MQTT connect success");// 未发生异常，则连接成�?
+		LOGGER.info("MQTT connect success");// 未发生异常，则连接成功
 	}
 
 	public void disconnect() throws MqttException {
@@ -197,7 +197,7 @@ public class MQTTClient implements MqttCallback, MqttCallbackExtended {
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
-		LOGGER.info("接收消息主题 : {}，接收消息内�? : {}", topic, new String(message.getPayload()));
+		LOGGER.info("接收消息主题 : {}，接收消息内容 : {}", topic, new String(message.getPayload()));
 		MqttMessageVo mm = new MqttMessageVo();
 		mm.setClientId(topic);
 		mm.setHost(this.host);

@@ -50,7 +50,7 @@ public class TagHistory {
 	/**
 	 * 标签类型
 	 */
-	private byte tagType;
+	private int tagType;
 	
 	/**
 	 * 卡扩展属性
@@ -83,10 +83,10 @@ public class TagHistory {
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
 	}
-	public byte getTagType() {
+	public int getTagType() {
 		return tagType;
 	}
-	public void setTagType(byte tagType) {
+	public void setTagType(int tagType) {
 		this.tagType = tagType;
 	}
 	public Map<String, Object> getTagExtendParams() {

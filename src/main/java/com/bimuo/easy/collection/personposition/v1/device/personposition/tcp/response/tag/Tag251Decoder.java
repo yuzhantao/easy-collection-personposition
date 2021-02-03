@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
-import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag10Vo;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag251Vo;
 
 /**
@@ -44,12 +43,12 @@ public class Tag251Decoder implements ITagDecoder<Tag251Vo> {
 			long rTagId = replaceArr >>> 40;
 
 			// 解voltage,1位,取出arrayTag第3字节赋值给新数组arrayVoltage,再取新数组第0位
-			byte[] arrayVoltage = null;
+			byte[] arrayVoltage = new byte[1];
 			System.arraycopy(arrayTag, 3, arrayVoltage, 0, 1);
 			int rVoltage = arrayVoltage[0];
 
 			// 解hum,16位,有符号整数,直接读取使用即可
-			byte[] arrayHum = null;
+			byte[] arrayHum = new byte[16];
 			// 复制数组需跳过7位保留位,取arrayTag第4字节
 			System.arraycopy(arrayTag, 4, arrayHum, 0, 2);
 			int replaceHum = ByteUtil.byteArrayToInt(arrayHum);
@@ -66,7 +65,7 @@ public class Tag251Decoder implements ITagDecoder<Tag251Vo> {
 //			}
 
 			// 解temp,16位,有符号整数,直接读取使用即可
-			byte[] arrayTemp = null;
+			byte[] arrayTemp = new byte[16];
 			// 取arrayTag第5字节
 			System.arraycopy(arrayTag, 5, arrayTemp, 0, 2);
 			int replaceTemp = ByteUtil.byteArrayToInt(arrayTemp);

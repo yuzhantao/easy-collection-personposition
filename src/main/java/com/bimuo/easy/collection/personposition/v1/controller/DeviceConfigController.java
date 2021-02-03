@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigAllParamNoneException;
+import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigCodeNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigUpdateFailedException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
@@ -79,9 +80,18 @@ public class DeviceConfigController {
 			@RequestParam(required = false) Byte tagType, @RequestParam(required = false) String crcEn)
 			throws Exception {
 		// 1.先判断参数是否全空,是则停止修改报异常
-		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId) && cain1 != null && cain2 != null && airBaudrate != null && 
-				baudrate != null && StringUtils.isNotBlank(buzzType) && StringUtils.isNotBlank(ioInput) && critical != null && 
-				filterTagTime != null && sendInterval != null && tagType != null && StringUtils.isNotBlank(crcEn),
+		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
+		AssertUtils.checkArgument(cain1 != null || 
+				cain2 != null || 
+				airBaudrate != null || 
+				baudrate != null || 
+				StringUtils.isNotBlank(buzzType) || 
+				StringUtils.isNotBlank(ioInput) || 
+				critical != null || 
+				filterTagTime != null || 
+				sendInterval != null || 
+				tagType != null || 
+				StringUtils.isNotBlank(crcEn),
 				new DeviceConfigAllParamNoneException());
 		
 		// 2.修改硬件配置
@@ -100,7 +110,7 @@ public class DeviceConfigController {
 			Thread.sleep(1000);
 			long endTime = System.currentTimeMillis();
 			if (DeviceConfigResponseMapping.getInstance().findDeviceCode(findCode) == false
-					|| endTime - startTime > 10000) {
+					|| endTime - startTime < 100000) {
 				continue; // break会跳出整个while,应该用continue
 			} else {
 				DeviceConfigResponseMapping.getInstance().removeResponseMapping(findCode); // 找到后删除该编号map记录

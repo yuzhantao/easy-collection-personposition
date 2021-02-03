@@ -23,7 +23,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 	@Override
 	public List<Tag30Vo> decoder(PersonPositionMessage msg) {
 		List<Tag30Vo> tags = new ArrayList<>();
-		
+		// TODO 解码对不对
 		// Data字段标签个数
 		byte tagCount = msg.getData()[0];
 		log.info("该Data段的标签30个数为:{}", tagCount);
@@ -34,12 +34,12 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			Tag30Vo tag30 = new Tag30Vo();
 			byte[] arrayTag = msg.getData();
 			// 查看标签的二进制形式
-			String replaceStr = new String(arrayTag);
-			Long replaceArr = Long.valueOf(replaceStr, 2);
+			Long replaceArr = ByteUtil.bytesToLong(arrayTag);
 			String bTag = Long.toBinaryString(replaceArr);
-			log.info("标签1的二进制为:{}(前两位保留位为0则不显示)",bTag);
+			log.info("标签30的二进制为:{}(前两位保留位为0则不显示)",bTag);
 			// 解tagId,3字节
-			long rTagId = replaceArr >>> 32;
+			long andTagId = replaceArr & 0xFFFFFFFFFFFFFFL;
+			long rTagId = andTagId >>> 32;
 			
 			// 解activate-button2,各1位
 			//TODO 需要先&再移位,不然值会发生改变,下述需要修改,参考表标签10
@@ -109,14 +109,14 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			}
 			
 			String gain = ByteUtil.intToBinary(rGain);
-			
-			if(gain.equals("00")) {
+			// 00变成0
+			if(gain.equals("0")) {
 				tag30.setGain("增益0");
-			} else if(gain.equals("01")) {
+			} else if(gain.equals("1")) {
 				tag30.setGain("增益1");
-			} else if(gain.equals("10")) {
+			} else if(gain.equals("2")) {
 				tag30.setGain("增益2");
-			} else if(gain.equals("11")) {
+			} else if(gain.equals("3")) {
 				tag30.setGain("增益3");
 			}
 			
@@ -131,13 +131,12 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			// 解activatorId,2字节
 			byte[] arrayActivatorId = new byte[2];
 			System.arraycopy(arrayTag, 4, arrayActivatorId, 0, 2);
-			int rActivatorId = ByteUtil.byteArrayToInt(arrayActivatorId);
+			int rActivatorId = ByteUtil.byteArrToShort(arrayActivatorId);
 			tag30.setActivatorId(rActivatorId);
 			
 			// 解RSSI,1字节
-			byte[] arrayRSSI = new byte[1];
-			System.arraycopy(arrayTag, 6, arrayActivatorId, 0, 1);
-			int rRSSI = ByteUtil.byteArrayToInt(arrayRSSI);
+			byte arrayRSSI = arrayTag[6];
+			int rRSSI = ByteUtil.byteToInt(arrayRSSI);
 			tag30.setRSSI(rRSSI);
 			
 			tags.add(tag30);

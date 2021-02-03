@@ -4,15 +4,20 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.MDC;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.bimuo.easy.collection.personposition.core.annotation.NotProguard;
 import com.bimuo.easy.collection.personposition.core.message.MessageHandleContext;
 import com.bimuo.easy.collection.personposition.core.server.CollectionServer;
+import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
 import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.HeartPackageHandle;
@@ -27,7 +32,23 @@ import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.res
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.tag.Tag253Decoder;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.tag.Tag30Decoder;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.DeviceTagReadVo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag0Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag10Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag11Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag1Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag20Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag251Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag252Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag253Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag30Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag3Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag4Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag5Vo;
+import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag6Vo;
+import com.bimuo.easy.collection.personposition.v1.exception.TagReadNoDeviceException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
+import com.bimuo.easy.collection.personposition.v1.model.TagHistory;
+import com.bimuo.easy.collection.personposition.v1.mqtt.IMqttMessageSenderService;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
@@ -46,17 +67,20 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 	private PersonPositionEventBusService personPositionEventBusService;
 	private IDeviceConfigService deviceConfigService; // 解析设备回复的指令
 	private IPersonPositionDeviceService personPositionDeviceService; // 人员定位相关服务
+	private ITagHistoryService tagHistoryService; // 标签历史相关服务
+	private IMqttMessageSenderService mqttMessageSenderService; // mqtt相关服务
 	
 	private static int linkDeviceCount = 0; // 设备总数量
 	private int deviceIndex; // 设备索引号
-	private ITagHistoryService tagHistoryService;
 	
-	public PersonPositionResponseHandleContext(PersonPositionEventBusService personPositionEventBusService, IDeviceConfigService deviceConfigService, IPersonPositionDeviceService personPositionDeviceService,ITagHistoryService tagHistoryService) {
+	
+	public PersonPositionResponseHandleContext(PersonPositionEventBusService personPositionEventBusService, IDeviceConfigService deviceConfigService, IPersonPositionDeviceService personPositionDeviceService,ITagHistoryService tagHistoryService,IMqttMessageSenderService mqttMessageSenderService) {
 		super();
 		this.personPositionEventBusService = personPositionEventBusService;
 		this.deviceConfigService = deviceConfigService;
 		this.personPositionDeviceService = personPositionDeviceService;
 		this.tagHistoryService = tagHistoryService;
+		this.mqttMessageSenderService = mqttMessageSenderService;
 		this.messageHandleContent = new MessageHandleContext<>();
 //		this.messageHandleContent.setOnlyHandle(false);
 //		
@@ -195,7 +219,29 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		if (msg.getCommand() == 0x44) { // 0x44协议用来读取设备配置
 			logger.info("==========设备回复指令的协议是:" + msg.getCommand() + " " + "Data段是:" + ByteUtil.byteArrToHexString(data));
 			
-			// 1.处理设备配置信息
+			// 1.处理设备信息
+			// 一旦设备连接,查到设备则更新数据库设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
+			PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+			logger.info("==========连接的设备编号是{}", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+			if (dev != null) {
+				dev.setDeviceState("online");
+				dev.setIp(ip);
+				dev.setUpdateTime(new Date());
+				personPositionDeviceService.modify(dev);
+				logger.info("==========数据库设备信息更新成功!");
+			} else {
+				PersonPositionDevice newDevice = new PersonPositionDevice();
+				newDevice.setDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+				newDevice.setDeviceState("online");
+				newDevice.setCreateTime(new Date());
+				newDevice.setUpdateTime(new Date());
+				newDevice.setDeviceType("人员定位设备");
+				newDevice.setIp(ip);
+				personPositionDeviceService.insert(newDevice);
+				logger.info("==========数据库添加新设备成功!");
+			}
+			
+			// 2.处理设备配置信息
 			// 更新数据库配置信息,连接读取配置时设备编号既是旧编号也是新编号
 			DeviceConfigReadVo dconfig = deviceConfigService.updateConfig(
 					ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase(),
@@ -207,31 +253,12 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 					data[11], // 标签类型,11是硬件回复44协议Data[]段的11字节,后根据此字段读取标签类型
 					Byte.toString(data[12]));
 			
-			// 2.处理设备信息
-			// 一旦设备连接,查到设备则更新数据库设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
-			PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-			logger.info("==========连接的设备编号是{}", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-			if (dev != null) {
-				dev.setDeviceState("online");
-				dev.setIp(ip);
-				dev.setUpdateTime(new Date());
-				dev.setDeviceConfig(dconfig);
-				personPositionDeviceService.modify(dev);
-				logger.info("==========数据库设备信息更新成功!");
-			} else {
-				PersonPositionDevice newDevice = new PersonPositionDevice();
-				newDevice.setDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-				newDevice.setDeviceState("online");
-				newDevice.setCreateTime(new Date());
-				newDevice.setUpdateTime(new Date());
-				newDevice.setDeviceType("人员定位设备");
-				newDevice.setIp(ip);
-				newDevice.setDeviceConfig(dconfig);
-				personPositionDeviceService.insert(newDevice);
-				logger.info("==========数据库添加新设备成功!");
-			}
-
-			// 2.将配置类放入内存
+			// 更新配置
+			PersonPositionDevice device = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+			device.setDeviceConfig(dconfig);
+			personPositionDeviceService.modify(device);
+			
+			// 3.将配置类放入内存
 			deviceConfigService.addMemory(msg, dconfig);
 
 			if (dconfig.getTagType() == 30) { // 30是标签协议编号,目前设备只能读取标签30
@@ -243,9 +270,15 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			}
 
 		} else if (msg.getCommand() == 0x41) { // 0x41协议用来读取标签
-			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());
+			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase();
+			AssertUtils.checkArgument(deviceConfigService.findByDeviceId(deviceId) != null, new TagReadNoDeviceException());
 			int tagType = deviceConfigService.findByDeviceId(deviceId).getTagType();
 			logger.info("该指令读到的标签类型是:" + tagType);
+			
+			TagHistory tagHistory = new TagHistory(); // 标签历史,用于存到数据库以及页面展示
+			tagHistory.setCreateTime(new Date());
+			tagHistory.setDeviceCode(deviceId);
+			
 			List<DeviceTagReadVo> tags = new ArrayList<>();
 			if (tagType == 0 || tagType == 3 || tagType == 4 || tagType == 5 || tagType == 6) {
 				ITagDecoder td = new Tag0Decoder();
@@ -275,10 +308,128 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				ITagDecoder td = new Tag253Decoder();
 				tags = td.decoder(msg);
 			}
-
-			// TODO 发送tag到MQ
-			//tagHistoryService.save(th);
+			// 标签历史存储扩展属性的map
+			Map<String,Object> tagExtendParamsMap = new HashedMap<String, Object>();
+			// 1.标签历史存到数据库
+			for(int i = 0; i < tags.size(); i++){
+				if(tags.get(i) instanceof Tag0Vo) {
+					Tag0Vo tag0 = (Tag0Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag0.getTagId()));
+					tagHistory.setTagType(tag0.getTagType());
+					tagExtendParamsMap.put("标签0","不含任何特征位");
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag3Vo) {
+					Tag3Vo tag3 = (Tag3Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag3.getTagId()));
+					tagHistory.setTagType(tag3.getTagType());
+					tagExtendParamsMap.put("标签3","不含任何特征位");
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag4Vo) {
+					Tag4Vo tag4 = (Tag4Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag4.getTagId()));
+					tagHistory.setTagType(tag4.getTagType());
+					tagExtendParamsMap.put("标签4","不含任何特征位");
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag5Vo) {
+					Tag5Vo tag5 = (Tag5Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag5.getTagId()));
+					tagHistory.setTagType(tag5.getTagType());
+					tagExtendParamsMap.put("标签5","不含任何特征位");
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag6Vo) {
+					Tag6Vo tag6 = (Tag6Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag6.getTagId()));
+					tagHistory.setTagType(tag6.getTagType());
+					tagExtendParamsMap.put("标签6","不含任何特征位");
+				} else if(tags.get(i) instanceof Tag1Vo) { 
+					Tag1Vo tag1 = (Tag1Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag1.getTagId()));
+					tagHistory.setTagType(tag1.getTagType());
+					tagExtendParamsMap.put("增益", tag1.getGain());
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag10Vo) { 
+					Tag10Vo tag10 = (Tag10Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag10.getTagId()));
+					tagHistory.setTagType(tag10.getTagType());
+					tagExtendParamsMap.put("类型", tag10.getRealTagType());
+					tagExtendParamsMap.put("电压", tag10.getVoltage());
+					tagExtendParamsMap.put("按钮", tag10.getButton());
+					tagExtendParamsMap.put("防拆", tag10.getTamper());
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag11Vo) { 
+					Tag11Vo tag11 = (Tag11Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag11.getTagId()));
+					tagHistory.setTagType(tag11.getTagType());
+					tagExtendParamsMap.put("电压", tag11.getVoltage());
+					tagExtendParamsMap.put("按钮", tag11.getButton());
+					tagExtendParamsMap.put("增益", tag11.getGain());
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag20Vo) { 
+					Tag20Vo tag20 = (Tag20Vo) tags.get(i);
+					tagHistory.setTagId(Integer.toHexString(tag20.getTagId()));
+					tagHistory.setTagType(tag20.getTagType());
+					tagExtendParamsMap.put("类型", tag20.getRealTagType());
+					tagExtendParamsMap.put("电压", tag20.getVoltage());
+					tagExtendParamsMap.put("防拆", tag20.getTamper());
+					tagExtendParamsMap.put("按钮1", tag20.getButton1());
+					tagExtendParamsMap.put("按钮2", tag20.getButton2());
+					tagExtendParamsMap.put("增益", tag20.getGain());
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag30Vo) {
+					Tag30Vo tag30 = (Tag30Vo) tags.get(i);
+					tagHistory.setTagId(Long.toHexString(tag30.getTagId()));
+					tagHistory.setTagType(tag30.getTagType());
+					tagExtendParamsMap.put("激活", tag30.getActivate());
+					tagExtendParamsMap.put("电压", tag30.getVoltage());
+					tagExtendParamsMap.put("防拆", tag30.getTamper());
+					tagExtendParamsMap.put("按钮1", tag30.getButton1());
+					tagExtendParamsMap.put("按钮2", tag30.getButton2());
+					tagExtendParamsMap.put("增益", tag30.getGain());
+					tagExtendParamsMap.put("穿越", tag30.getTraverse());
+					tagExtendParamsMap.put("激活器ID", tag30.getActivatorId());
+					tagExtendParamsMap.put("场强", tag30.getRSSI());
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag251Vo) { 
+					Tag251Vo tag251 = (Tag251Vo) tags.get(i);
+					tagHistory.setTagId(Long.toHexString(tag251.getTagId()));
+					tagHistory.setTagType(tag251.getTagType());
+					tagExtendParamsMap.put("电压", tag251.getVoltage());
+					tagExtendParamsMap.put("湿度", tag251.getHum());
+					tagExtendParamsMap.put("温度", tag251.getTemp());
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag252Vo) { 
+					Tag252Vo tag252 = (Tag252Vo) tags.get(i);
+					tagHistory.setTagId(Long.toHexString(tag252.getTagId()));
+					tagHistory.setTagType(tag252.getTagType());
+					tagExtendParamsMap.put("按钮", tag252.getButton());
+					tagExtendParamsMap.put("电压", tag252.getVoltage());
+					tagExtendParamsMap.put("温度范围", tag252.getSign());
+					tagExtendParamsMap.put("温度", tag252.getTemp());
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				} else if(tags.get(i) instanceof Tag253Vo) { 
+					Tag253Vo tag253 = (Tag253Vo) tags.get(i);
+					tagHistory.setTagId(Long.toHexString(tag253.getTagId()));
+					tagHistory.setTagType(tag253.getTagType());
+					tagExtendParamsMap.put("类型", tag253.getRealTagType());
+					tagExtendParamsMap.put("电压", tag253.getVoltage());
+					tagExtendParamsMap.put("温度范围", tag253.getSign());
+					tagExtendParamsMap.put("温度", tag253.getTemp());
+					tagHistory.setTagExtendParams(tagExtendParamsMap);
+				}
+				tagHistoryService.save(tagHistory);
+				logger.debug("存储标签历史成功,标签id={}",tagHistory.getTagId());
+			}
 			
+			// 2.发送标签历史到MQTT 接收地址是配置文件中mqtt.host 默认地址在MqttOutConfig
+			String topic = "personpositon/"+ deviceId + "/tags/" + tagHistory.getTagId();
+			String mqttData = JSONArray.toJSON(tagHistory).toString();
+			if(StringUtils.isNotBlank(topic)) {
+				mqttMessageSenderService.sendToMqtt(topic, mqttData);
+				logger.info("发送mqtt消息完成,主题:{},消息:{}", topic, mqttData);
+			} else {
+				logger.error("发送mqtt消息失败,主题:{},消息:{}", topic, mqttData);
+			}
+				
 		} else if (msg.getCommand() == 0x42) { // 0x42协议接收设备心跳
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());
 

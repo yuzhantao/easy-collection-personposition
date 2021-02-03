@@ -8,16 +8,16 @@ package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.re
  */
 public class Tag3Vo extends DeviceTagReadVo {
 
-	private int tagID; // 3字节全部表示标签ID，不含任何特征位
+	private int tagId; // 3字节全部表示标签ID，不含任何特征位
 
-	public int getTagID() {
-		return tagID;
+	public int getTagId() {
+		return tagId;
 	}
 
-	public void setTagID(int tagID) {
-		this.tagID = tagID;
+	public void setTagId(int tagId) {
+		this.tagId = tagId;
 	}
-	
+
 	@Override
 	public int getTagType() {
 		return 3;

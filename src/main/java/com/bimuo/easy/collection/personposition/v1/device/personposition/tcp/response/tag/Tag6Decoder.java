@@ -36,7 +36,7 @@ public class Tag6Decoder implements ITagDecoder<Tag6Vo> {
 			String bTag = ByteUtil.intToBinary(rTagId);
 			log.info("标签6的二进制为:{}(前两位保留位为0则不显示)",bTag);
 			// 解tagId,3字节
-			tag6.setTagID(rTagId);
+			tag6.setTagId(rTagId);
 			tags.add(tag6);
 			log.info("第{}个标签6的tagId={}",i,bTag);
 		}
