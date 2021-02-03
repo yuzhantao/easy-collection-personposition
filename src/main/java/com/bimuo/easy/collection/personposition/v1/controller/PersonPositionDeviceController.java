@@ -57,7 +57,7 @@ public class PersonPositionDeviceController {
 			@RequestParam(required=false) String deviceCode,
 			@RequestParam(required=false) String deviceType,
 			@RequestParam(required=false) String ip,
-			@PageableDefault(value = 10, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
+			@PageableDefault(value = 10, sort = { "updateTime" }, direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
 		Page<PersonPositionDevice> ps =  personPositionDeviceService.queryList(deviceState,deviceCode,deviceType,ip,pageable);
 		return ps;
 	}
