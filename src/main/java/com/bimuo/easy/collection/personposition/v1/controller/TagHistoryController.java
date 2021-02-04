@@ -63,7 +63,7 @@ public class TagHistoryController {
 			String startTime,
 			@RequestParam(required=false) 
 			String endTime,
-			@PageableDefault(value = 10, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
+			@PageableDefault(value = 10, sort = { "createTime" }, direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
 		
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date realStartTime = null;
