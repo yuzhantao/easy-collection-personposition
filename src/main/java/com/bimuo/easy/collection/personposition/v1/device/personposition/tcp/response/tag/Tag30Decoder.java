@@ -37,6 +37,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			Long replaceArr = ByteUtil.bytesToLong(arrayTag);
 			String bTag = Long.toBinaryString(replaceArr);
 			log.info("标签30的二进制为:{}(前两位保留位为0则不显示)",bTag);
+			// TODO tagId大写
 			// 解tagId,3字节
 			long andTagId = replaceArr & 0xFFFFFFFFFFFFFFL;
 			long rTagId = andTagId >>> 32;
@@ -66,7 +67,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			int rTraverse = arrayTag[3] & 0x1;
 			
 			// 给tag30赋值
-			tag30.setTagId(rTagId);
+			tag30.setTagId(Long.toHexString(rTagId).toUpperCase());
 			
 			if(rActivate==0) {
 				tag30.setActivate("在不激活区");
@@ -141,7 +142,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			
 			tags.add(tag30);
 			log.info("第{}个标签30的tagId={},activate={},voltage={},tamper={},button1={},button2={},gain={},traverse={},activatorId={},RSSI={}",i,
-					Long.toBinaryString(tag30.getTagId()),
+					tag30.getTagId(),
 					tag30.getActivate(),
 					tag30.getVoltage(),
 					tag30.getTamper(),

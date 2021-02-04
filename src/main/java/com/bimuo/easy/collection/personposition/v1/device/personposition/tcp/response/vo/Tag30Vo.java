@@ -8,7 +8,7 @@ package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.re
  */
 public class Tag30Vo extends DeviceTagReadVo {
 	
-	private long tagId;	// 标签ID,24位(3字节)
+	private String tagId;	// 标签ID,24位(3字节)
 	private String activate; // 激活位置,1位(0在不激活区1在激活器)
 	private String voltage; // 电压状态,1位(0电压正常,1电压低)
 	private String tamper;	// 防拆状态,1位(0防拆正常,1防拆异常)
@@ -19,10 +19,10 @@ public class Tag30Vo extends DeviceTagReadVo {
 	private int activatorId; // 激活器ID,16位(2字节)	
 	private int RSSI; // 场强值,8位(1字节)	
 	
-	public long getTagId() {
+	public String getTagId() {
 		return tagId;
 	}
-	public void setTagId(long tagId) {
+	public void setTagId(String tagId) {
 		this.tagId = tagId;
 	}
 	public String getActivate() {

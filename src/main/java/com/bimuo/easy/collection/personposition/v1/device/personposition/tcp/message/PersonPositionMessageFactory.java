@@ -2,7 +2,7 @@ package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.me
 
 import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 /**
- * 自动应答客户端  工厂（硬件每次发送报文给上位机后，上位机必须自动做出应答，此类和解析业务系统的工厂有区别）
+ * 消息工厂 生成发送给硬件的指令
  * @author Pingfan
  *
  */

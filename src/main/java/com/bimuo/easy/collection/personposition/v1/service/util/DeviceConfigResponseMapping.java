@@ -1,7 +1,6 @@
 package com.bimuo.easy.collection.personposition.v1.service.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 记录修改硬件配置后设备回复的信息(Context用)
@@ -12,7 +11,7 @@ import java.util.Map;
 public class DeviceConfigResponseMapping {
 
 	// 存放修改硬件配置的设备编号和修改状态
-	private Map<String, String> deviceConfigResponseMappingList;
+	private ConcurrentHashMap<String, String> deviceConfigResponseMappingList;
 	
 	private static DeviceConfigResponseMapping instance;
 	
@@ -20,7 +19,7 @@ public class DeviceConfigResponseMapping {
 	 * 私有化构造函数
 	 */
 	public DeviceConfigResponseMapping() {
-		this.deviceConfigResponseMappingList = new HashMap<String, String>();
+		this.deviceConfigResponseMappingList = new ConcurrentHashMap<String, String>();
 	}
 
 	/**
@@ -42,6 +41,19 @@ public class DeviceConfigResponseMapping {
 	public boolean findDeviceCode(String mappingKey) {
 		return this.deviceConfigResponseMappingList.containsKey(mappingKey);
 	}
+	
+	/**
+	 * 根据映射获取通道
+	 * @param mappingKey 根据次字段(此指设备编号)查找指定管道实体类
+	 * @return
+	 */
+	public String getUpdateConfigState(String mappingKey) {
+		if(this.deviceConfigResponseMappingList.get(mappingKey) == null) {
+			return null;
+		}
+		return this.deviceConfigResponseMappingList.get(mappingKey);
+	}
+	
 	
 	/**
 	 * 记录修改硬件配置后设备回复的信息

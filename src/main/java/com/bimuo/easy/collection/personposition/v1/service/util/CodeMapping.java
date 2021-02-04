@@ -42,7 +42,7 @@ public class CodeMapping {
 	
 	/**
 	 * 根据映射获取通道
-	 * @param mappingKey 根据次字段查找指定管道实体类
+	 * @param mappingKey 根据次字段(此指设备编号)查找指定管道实体类
 	 * @return
 	 */
 	public Channel getChannel(String mappingKey) {
@@ -96,9 +96,13 @@ public class CodeMapping {
 	 */
 	public Channel updateChannelMapping(String oldKey,String newKey){
 		Channel channel = getChannel(oldKey);
-		this.codeMappingList.put(newKey, channel.id());
-		this.codeMappingList.remove(oldKey);
-		return channel;
+		if(oldKey.equals(newKey)) {
+			return channel;
+		} else {
+			this.codeMappingList.put(newKey, channel.id());
+			this.codeMappingList.remove(oldKey);
+			return channel;
+		}
 	}
 	
 	/**
