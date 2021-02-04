@@ -38,14 +38,14 @@ public class GetPersonPositionDeviceConfigTask {
     public void runfirst() {
 		ByteBuf bs = Unpooled.copiedBuffer(datas);
 		ChannelGroupFuture future = CollectionServer.channels.writeAndFlush(bs); // channels向所有设备发送指令
-        log.info("********轮询开始********");
+        log.debug("********轮询开始********");
         // 监听发送状态
         future.addListener(new ChannelGroupFutureListener() {
 			@NotProguard
 			@Override
 			public void operationComplete(ChannelGroupFuture future) throws Exception {
 				if (future.isSuccess()) {
-					log.info("发送读取设备配置命令成功,下发命令={}",ByteUtil.byteArrToHexString(datas, true));
+					log.debug("发送读取设备配置命令成功,下发命令={}",ByteUtil.byteArrToHexString(datas, true));
 				} else {
 					log.error("发送读取设备配置命令失败,下发命令={}",ByteUtil.byteArrToHexString(datas, true));
 				}
