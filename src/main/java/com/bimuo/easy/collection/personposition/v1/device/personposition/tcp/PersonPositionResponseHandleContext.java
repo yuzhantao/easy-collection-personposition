@@ -166,15 +166,17 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 
 		MDC.put("ip", ip);
 		// 离线时根据ip查询离线设备,再将设备状态改为offline,同时修改更新时间
-		PersonPositionDevice dev = personPositionDeviceService.getOneByIp(ip);
-		if(dev != null && dev.isEffective()) {
-			dev.setDeviceState("offline");
-			dev.setUpdateTime(new Date());
-			personPositionDeviceService.modify(dev);
-		} else {
+		List<PersonPositionDevice> devices = personPositionDeviceService.getOneByIp(ip);
+		if(devices.isEmpty()) {
 			logger.error("断开时根据ip查询到多条记录,更新数据库失败!");
+		} else {
+			for (int i = 0; i < devices.size(); i++) {
+				devices.get(i).setDeviceState("offline");
+				devices.get(i).setUpdateTime(new Date());
+				personPositionDeviceService.modify(devices.get(i));
+				logger.info("人员定位设备已断开{},设备状态为{}",ip,devices.get(i).getDeviceState());
+			}
 		}
-		logger.info("人员定位设备已断开{},设备状态为{}",ip,dev.getDeviceState());
 		MDC.remove("ip");
 
 //		NetMapping.getInstance().removeChannel(ctx.channel());

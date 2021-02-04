@@ -1,5 +1,8 @@
 package com.bimuo.easy.collection.personposition.v1.repository;
 
+import java.util.List;
+
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
@@ -18,7 +21,7 @@ public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPos
 	 * @param ip ip地址
 	 * @return 查询到的设备实体
 	 */
-	PersonPositionDevice getOneByIp(String ip);
+	List<PersonPositionDevice> getOneByIpAndIsEffective(String ip,boolean isEffective);
 	
 	/**
 	 * 根据设备编号删除一个设备
@@ -32,5 +35,5 @@ public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPos
 	 * @param deviceState 设备状态
 	 * @return 在线离线的设备数量
 	 */
-	int countByDeviceState(String deviceState);
+	int countByDeviceStateAndIsEffective(String deviceState,boolean isEffective);
 }
