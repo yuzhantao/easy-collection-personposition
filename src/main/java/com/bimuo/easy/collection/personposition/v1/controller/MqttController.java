@@ -20,12 +20,14 @@ import com.bimuo.easy.collection.personposition.v1.mqtt.IMqttMessageSenderServic
 @ConditionalOnProperty(value = "mqtt.enabled", havingValue = "true")
 @RequestMapping("/public/mqtt")
 public class MqttController {
+	
 	private Logger logger = LogManager.getLogger(this.getClass());
     private final IMqttMessageSenderService mqttMessageSender;
 
     public MqttController(IMqttMessageSenderService mqttMessageSender) {
         this.mqttMessageSender = mqttMessageSender;
     }
+  
 
     /**
      * 发送mqtt消息
