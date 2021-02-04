@@ -26,21 +26,23 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 		// TODO 解码对不对
 		// Data字段标签个数
 		byte tagCount = msg.getData()[0];
-		log.info("该Data段的标签30个数为:{}", tagCount);
+		log.info("该Data段的标签30个数为:{},数据={}", tagCount,ByteUtil.byteArrToHexString(msg.getData()));
 		
 		// Data字段标签,含有多个相同标签,i表示字节
 		for(int i = 1; i< msg.getData().length; i+=7) {
 			// 标签30类型,需要解tagId,activate,voltage,tamper,button1,button2,gain,traverse,activatorId,RSSI,各字段均以位为单位，所以使用移位运算符
 			Tag30Vo tag30 = new Tag30Vo();
-			byte[] arrayTag = msg.getData();
-			// 查看标签的二进制形式
-			Long replaceArr = ByteUtil.bytesToLong(arrayTag);
-			String bTag = Long.toBinaryString(replaceArr);
-			log.info("标签30的二进制为:{}(前两位保留位为0则不显示)",bTag);
+			byte[] arrayTag = new byte[7];
+			System.arraycopy(msg.getData(), i, arrayTag, 0, arrayTag.length);
+			log.info("标签的二进制指令为{}",ByteUtil.byteArrToHexString(arrayTag));
+			
 			// TODO tagId大写
 			// 解tagId,3字节
-			long andTagId = replaceArr & 0xFFFFFFFFFFFFFFL;
-			long rTagId = andTagId >>> 32;
+			byte[] bDiviceCode = new byte[4];
+			System.arraycopy(arrayTag, 0, bDiviceCode, 1, 3);
+			int iDiviceCode = ByteUtil.byteArrayToInt(bDiviceCode);
+			String tagCode = String.format("%06d", iDiviceCode).toUpperCase();
+			log.info("tagCode=",tagCode);
 			
 			// 解activate-button2,各1位
 			//TODO 需要先&再移位,不然值会发生改变,下述需要修改,参考表标签10
@@ -67,7 +69,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			int rTraverse = arrayTag[3] & 0x1;
 			
 			// 给tag30赋值
-			tag30.setTagId(Long.toHexString(rTagId).toUpperCase());
+			tag30.setTagId(tagCode);
 			
 			if(rActivate==0) {
 				tag30.setActivate("在不激活区");

@@ -52,10 +52,10 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 	}
 	
 	@Override
-	public PersonPositionDevice getOneByIp(String ip) {
-		PersonPositionDevice ppd = this.personPositionDeviceRepository.getOneByIp(ip);
-		AssertUtils.checkArgument(ppd != null, new DeviceIpNoneException());
-		return ppd;
+	public List<PersonPositionDevice> getOneByIp(String ip) {
+		List<PersonPositionDevice> devices = this.personPositionDeviceRepository.getOneByIpAndIsEffective(ip,false); // 收到4F4B后已设置失效,所以断线重连时将失效的设备记录改为offline
+		AssertUtils.checkArgument(devices.isEmpty() == false, new DeviceIpNoneException());
+		return devices;
 	}
 	
 	@Override
@@ -78,6 +78,7 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
                 if (StringUtils.isNotBlank(ip)) {
                     predicates.add(cb.like(root.get("ip").as(String.class), "%"+ip+"%"));
                 }
+                predicates.add(cb.equal(root.get("isEffective").as(boolean.class), 1)); // 只显示有效数据isEffective==1
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             }
         };
@@ -160,7 +161,7 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 
 	@Override
 	public int countByDeviceState(String deviceState) {
-		return personPositionDeviceRepository.countByDeviceState(deviceState);
+		return personPositionDeviceRepository.countByDeviceStateAndIsEffective(deviceState,true);
 	}
 
 	@Override

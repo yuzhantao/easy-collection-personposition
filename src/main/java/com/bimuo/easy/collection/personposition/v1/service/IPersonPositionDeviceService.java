@@ -57,7 +57,7 @@ public interface IPersonPositionDeviceService {
 	 * @param ip ip地址
 	 * @return 查询的设备实体
 	 */
-	PersonPositionDevice getOneByIp(String ip);
+	List<PersonPositionDevice> getOneByIp(String ip);
 	
 	/**
 	 * 添加人员定位设备

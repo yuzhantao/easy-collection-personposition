@@ -92,22 +92,20 @@ public class DeviceConfigController {
 			@RequestParam(required = false) Byte crcEn)
 			throws Exception {
 		// 1.先判断参数是否全空,是则停止修改报异常
-//		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
-		AssertUtils.checkArgument(
-				StringUtils.isNotBlank(deviceId) ||
-				cain1 != null || 
-				cain2 != null || 
-				airBaudrate != null || 
-				baudrate != null || 
-				buzzType != null || 
-				ioInput != null || 
-				critical != null || 
-				filterTagTime != null || 
-				sendInterval != null || 
-				tagType != null || 
-				crcEn != null,
-				new DeviceConfigAllParamNoneException());
-		
+		// TODO 控制参数范围,仅判空不够
+		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
+		AssertUtils.checkArgument(cain1 != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(cain2 != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(airBaudrate != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(baudrate != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(buzzType != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(ioInput != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(critical != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(filterTagTime != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(sendInterval != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(tagType != null,new DeviceConfigAllParamNoneException());
+		AssertUtils.checkArgument(crcEn != null,new DeviceConfigAllParamNoneException());
+
 		// 2.修改硬件配置
 		deviceConfigService.updateHardwareConfig(oldDeviceId, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType,
 				ioInput, critical, filterTagTime, sendInterval, tagType, crcEn);
