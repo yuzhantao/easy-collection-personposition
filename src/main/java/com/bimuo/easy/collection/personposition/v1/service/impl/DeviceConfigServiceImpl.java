@@ -64,15 +64,15 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			Byte cain2,
 			Byte airBaudrate,
 			Byte baudrate,
-			String buzzType,
-			String ioInput,
+			Byte buzzType,
+			Byte ioInput,
 			Byte critical,
 			Byte filterTagTime,
 			Byte sendInterval,
 			Byte tagType,
-			String crcEn) {
+			Byte crcEn) {
 		if (StringUtils.isNotBlank(deviceId)) {
-			config.setDeviceId(deviceId.toUpperCase());
+			config.setDeviceId(deviceId);
 		}
 		if (cain1 != null) {
 			config.setCain1(cain1);
@@ -86,23 +86,11 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 		if ((baudrate!= null)) {
 			config.setBaudrate(baudrate);
 		}
-		if (StringUtils.isNotBlank(buzzType)) {
-			if (buzzType.equals("0")) {
-				config.setBuzzType("关");
-			} else if (buzzType.equals("1")) {
-				config.setBuzzType("开");
-			} else {
-				config.setBuzzType("未读取到蜂鸣器状态");
-			};
+		if (buzzType != null) {
+			config.setBuzzType(buzzType);
 		}
-		if (StringUtils.isNotBlank(ioInput)) {
-			if (buzzType.equals("0")) {
-				config.setIoInput("无地感");
-			} else if (buzzType.equals("1")) {
-				config.setIoInput("有地感");
-			} else {
-				config.setIoInput("未读取到地感值");
-			};
+		if (ioInput != null) {
+			config.setIoInput(ioInput);
 		}
 		if ((critical!= null)) {
 			config.setCritical(critical);
@@ -116,14 +104,8 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 		if ((tagType != null)) {
 			config.setTagType(tagType);
 		}
-		if (StringUtils.isNotBlank(crcEn)) {
-			if (buzzType.equals("0")) {
-				config.setCrcEn("取消");
-			} else if (buzzType.equals("1")) {
-				config.setCrcEn("有效");
-			} else {
-				config.setCrcEn("未读取到设备CRC状态");
-			};
+		if (crcEn != null) {
+			config.setCrcEn(crcEn);
 		}
 	}
 	
@@ -152,13 +134,13 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			Byte cain2,
 			Byte airBaudrate,
 			Byte baudrate,
-			String buzzType,
-			String ioInput,
+			Byte buzzType,
+			Byte ioInput,
 			Byte critical,
 			Byte filterTagTime,
 			Byte sendInterval,
 			Byte tagType,
-			String crcEn) {
+			Byte crcEn) {
 		DeviceConfigReadVo config = new DeviceConfigReadVo();
 		// 判断用于查询的编号是否为空
 		Preconditions.checkArgument(StringUtils.isNotBlank(oldDeviceId),new DeviceCodeNoneException());
@@ -218,13 +200,13 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			Byte cain2,
 			Byte airBaudrate,
 			Byte baudrate,
-			String buzzType,
-			String ioInput,
+			Byte buzzType,
+			Byte ioInput,
 			Byte critical,
 			Byte filterTagTime,
 			Byte sendInterval,
 			Byte tagType,
-			String crcEn) {
+			Byte crcEn) {
 		// Controller已判断参数全空,此处不需要
 		// 发送给硬件修改配置的指令,参考协议43
 		byte[] dataArr = new byte[14]; // data段14字节
@@ -244,11 +226,11 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 		if(baudrate != null) {
 			dataArr[5] = baudrate;
 		}
-		if(StringUtils.isNotBlank(buzzType)) {
-			dataArr[6] = Byte.parseByte(buzzType);
+		if(buzzType != null) {
+			dataArr[6] = buzzType;
 		}
-		if(StringUtils.isNotBlank(ioInput)) {
-			dataArr[7] = Byte.parseByte(ioInput);
+		if(ioInput != null) {
+			dataArr[7] = ioInput;
 		}
 		if(critical != null) {
 			dataArr[8] = critical;
@@ -262,8 +244,8 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 		if(tagType != null) {
 			dataArr[11] = tagType;
 		}
-		if(StringUtils.isNotBlank(crcEn)) {
-			dataArr[12] = Byte.parseByte(crcEn);
+		if(crcEn != null) {
+			dataArr[12] = crcEn;
 		}
 		dataArr[13] = 0x00; // Reserver保留位 1字节
 		

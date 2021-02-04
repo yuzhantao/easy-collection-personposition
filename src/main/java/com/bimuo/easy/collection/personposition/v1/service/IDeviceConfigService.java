@@ -41,13 +41,13 @@ public interface IDeviceConfigService {
 			Byte cain2,
 			Byte airBaudrate,
 			Byte baudrate,
-			String buzzType,
-			String ioInput,
+			Byte buzzType,
+			Byte ioInput,
 			Byte critical,
 			Byte filterTagTime,
 			Byte sendInterval,
 			Byte tagType,
-			String crcEn);
+			Byte crcEn);
 	
 	/**
 	 * 将设备回复的指令写入内存
@@ -85,12 +85,12 @@ public interface IDeviceConfigService {
 			Byte cain2,
 			Byte airBaudrate,
 			Byte baudrate,
-			String buzzType,
-			String ioInput,
+			Byte buzzType,
+			Byte ioInput,
 			Byte critical,
 			Byte filterTagTime,
 			Byte sendInterval,
 			Byte tagType,
-			String crcEn);
+			Byte crcEn);
 	
 }
