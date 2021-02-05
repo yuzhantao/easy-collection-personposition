@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.bimuo.easy.collection.personposition.core.annotation.NotProguard;
 import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeNoneException;
@@ -258,7 +257,7 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 		
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(oldDeviceId);
-		if(channel == null) {
+		if(channel == null || !channel.isActive()) {
 			logger.info("code-channel表中不存在设备编号【{}】的管道",oldDeviceId);
 		} else {
 			logger.info("设备编号【{}】对应的管道是{}",oldDeviceId,channel);
@@ -266,7 +265,7 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			ChannelFuture cf = channel.writeAndFlush(bs);
 			// 回调函数监听是否发送成功
 			cf.addListener(new ChannelFutureListener() {
-				@NotProguard
+				
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
@@ -284,6 +283,7 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 						logger.error("发送修改设备配置命令失败,下发命令={}",ByteUtil.byteArrToHexString(command, true));
 					}
 				}
+				
 			});
 		}
 	}

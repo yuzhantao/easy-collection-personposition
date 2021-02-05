@@ -26,7 +26,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 		// TODO 解码对不对
 		// Data字段标签个数
 		byte tagCount = msg.getData()[0];
-		log.info("该Data段的标签30个数为:{},数据={}", tagCount,ByteUtil.byteArrToHexString(msg.getData()));
+		log.debug("该Data段的标签30个数为:{},数据={}", tagCount,ByteUtil.byteArrToHexString(msg.getData()));
 		
 		// Data字段标签,含有多个相同标签,i表示字节
 		for(int i = 1; i< msg.getData().length; i+=7) {
@@ -34,7 +34,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			Tag30Vo tag30 = new Tag30Vo();
 			byte[] arrayTag = new byte[7];
 			System.arraycopy(msg.getData(), i, arrayTag, 0, arrayTag.length);
-			log.info("标签的二进制指令为{}",ByteUtil.byteArrToHexString(arrayTag));
+			log.debug("标签的二进制指令为{}",ByteUtil.byteArrToHexString(arrayTag));
 			
 			// TODO tagId大写
 			// 解tagId,3字节
@@ -42,7 +42,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			System.arraycopy(arrayTag, 0, bDiviceCode, 1, 3);
 			int iDiviceCode = ByteUtil.byteArrayToInt(bDiviceCode);
 			String tagCode = String.format("%06d", iDiviceCode).toUpperCase();
-			log.info("tagCode=",tagCode);
+			log.debug("tagCode=",tagCode);
 			
 			// 解activate-button2,各1位
 			//TODO 需要先&再移位,不然值会发生改变,下述需要修改,参考表标签10
@@ -143,7 +143,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			tag30.setRSSI(rRSSI);
 			
 			tags.add(tag30);
-			log.info("第{}个标签30的tagId={},activate={},voltage={},tamper={},button1={},button2={},gain={},traverse={},activatorId={},RSSI={}",i,
+			log.debug("第{}个标签30的tagId={},activate={},voltage={},tamper={},button1={},button2={},gain={},traverse={},activatorId={},RSSI={}",i,
 					tag30.getTagId(),
 					tag30.getActivate(),
 					tag30.getVoltage(),

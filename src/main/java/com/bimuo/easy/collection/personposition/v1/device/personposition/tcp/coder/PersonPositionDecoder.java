@@ -1,23 +1,11 @@
 package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.coder;
 
-import java.net.InetSocketAddress;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.util.Arrays;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.slf4j.MDC;
-
 import com.bimuo.easy.collection.personposition.core.annotation.NotProguard;
-import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.util.CharsetUtil;
 
 /**
  * 硬件回复的消息预处理(解码及规范大格式)
@@ -26,7 +14,7 @@ import io.netty.util.CharsetUtil;
  *
  */
 public class PersonPositionDecoder extends LengthFieldBasedFrameDecoder {
-	private static Logger logger = LogManager.getLogger(PersonPositionDecoder.class.getName());
+//	private static Logger logger = LogManager.getLogger(PersonPositionDecoder.class.getName());
 
 	// 非数据段长度(不含校验码) 0x02 0x03 0x04 0x05
 	private static final int HEADER_SIZE = 10;
@@ -89,10 +77,10 @@ public class PersonPositionDecoder extends LengthFieldBasedFrameDecoder {
 	@NotProguard
 	@Override
 	protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-		String ip = insocket.getAddress().getHostAddress();
+//		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+//		String ip = insocket.getAddress().getHostAddress();
 		if (in == null) {
-			logger.info("threadId=" + Thread.currentThread().getId() + "return null;");
+//			logger.info("threadId=" + Thread.currentThread().getId() + "return null;");
 			return null;
 		}
 		in.markReaderIndex(); // 设置读标记
@@ -100,64 +88,64 @@ public class PersonPositionDecoder extends LengthFieldBasedFrameDecoder {
 		// 直接打印收到的指令
 		byte[] allData = new byte[in.readableBytes()];
 		in.readBytes(allData);
-		System.out.println("硬件的指令是：" + ByteUtil.byteArrToHexString(allData));
+//		System.out.println("硬件的指令是：" + ByteUtil.byteArrToHexString(allData));
 		in.resetReaderIndex(); // 还原到读标记位置
 		
 		if (this.data != null) { // body不等于空说明上一次读到完整数据了
 			// 数据不完整直接舍弃
-			System.out.println("缓存里的指令长度："+in.readableBytes());
-			System.out.println("非数据段的长度(不含校验位)："+HEADER_SIZE);
+//			System.out.println("缓存里的指令长度："+in.readableBytes());
+//			System.out.println("非数据段的长度(不含校验位)："+HEADER_SIZE);
 			if (in.readableBytes() < HEADER_SIZE) {
-				System.out.println("读取的缓存里的指令长度："+in.readableBytes());
-				System.out.println("读取的非数据段的长度(不含校验位)："+HEADER_SIZE);
+//				System.out.println("读取的缓存里的指令长度："+in.readableBytes());
+//				System.out.println("读取的非数据段的长度(不含校验位)："+HEADER_SIZE);
 				return null;
 			}
 			
 			// 按字节读包头
 			this.header = in.readByte();
 			if (this.header != Integer.valueOf("02", 16).byteValue()) { // 判断包头
-				System.out.println("02包头不合法,舍弃");
+//				System.out.println("02包头不合法,舍弃");
 				return null;
 			}
 			this.header = in.readByte();
 			if (this.header != Integer.valueOf("03", 16).byteValue()) { // 判断包头
-				System.out.println("03包头不合法,舍弃");
+//				System.out.println("03包头不合法,舍弃");
 				return null;
 			}
 			this.header = in.readByte();
 			if (this.header != Integer.valueOf("04", 16).byteValue()) { // 判断包头
-				System.out.println("04包头不合法,舍弃");
+//				System.out.println("04包头不合法,舍弃");
 				return null;
 			}
 			this.header = in.readByte();
 			if (this.header != Integer.valueOf("05", 16).byteValue()) { // 判断包头
-				System.out.println("05包头不合法,舍弃");
+//				System.out.println("05包头不合法,舍弃");
 				return null;
 			}
 			
 			// 读其它段
 			this.dataLen = in.readShort(); // 数据长度，2个字节
-			System.out.println("指令长度是："+dataLen);
+//			System.out.println("指令长度是："+dataLen);
 			
 			in.readBytes(this.devId); // 设备编号
-			System.out.println("设备编号是："+ByteUtil.byteArrToHexString(devId));
+//			System.out.println("设备编号是："+ByteUtil.byteArrToHexString(devId));
 			
 			this.command = in.readByte(); // 命令
-			System.out.println("命令编号是："+command);
+//			System.out.println("命令编号是："+command);
 			
 			this.sn = in.readByte(); // 数据包自增量
-			System.out.println("流水号是："+sn);
+//			System.out.println("流水号是："+sn);
 			
 			// 根据 LENGTH=LEN+DEVID+CMD+SN+DATA+CHECK，DATA长度=DATALEN-LEN-DEVID-CMD-SN-CHECK
 			// 计算 DATA长度
 			this.realDataLen = (short) (this.dataLen - 11);
 		}
 		
-		System.out.println("缓存里的指令长度："+in.readableBytes());
-		System.out.println("实际的数据长度是：" + this.realDataLen);
-		System.out.println("校验位长度是：" + CHECK_SIZE);
+//		System.out.println("缓存里的指令长度："+in.readableBytes());
+//		System.out.println("实际的数据长度是：" + this.realDataLen);
+//		System.out.println("校验位长度是：" + CHECK_SIZE);
 		if (in.readableBytes() < this.realDataLen + CHECK_SIZE) {
-			System.out.println("不合法的数据是："+ ByteUtil.byteArrToHexString(this.data));
+//			System.out.println("不合法的数据是："+ ByteUtil.byteArrToHexString(this.data));
 			this.data = null;
 			return null;
 		} else {
@@ -165,30 +153,30 @@ public class PersonPositionDecoder extends LengthFieldBasedFrameDecoder {
 			this.data = new byte[this.realDataLen];
 			if (this.realDataLen > 0) {
 				in.readBytes(this.data);
-				System.out.println("合法的数据是："+ ByteUtil.byteArrToHexString(this.data));
+//				System.out.println("合法的数据是："+ ByteUtil.byteArrToHexString(this.data));
 			}
 			
 			// 读校验位
 			byte check = in.readByte();
-			System.out.println("采集读到的校验码是：" + ByteUtil.byteArrToHexString(new byte[] {check}));
+//			System.out.println("采集读到的校验码是：" + ByteUtil.byteArrToHexString(new byte[] {check}));
 	        // 计算校验位
 	        byte crc = 0;
 	        in.resetReaderIndex(); // 还原到读标记位置
 	        int sumData = dataLen-1;
-	        System.out.println("累加的数据长度是：" + sumData);
+//	        System.out.println("累加的数据长度是：" + sumData);
 	        for(int i = 0; i < sumData; i++) {
 	        	crc+=in.readByte();
 	        }
-	        System.out.println("采集计算的校验码是：" + ByteUtil.byteArrToHexString(new byte[] {crc}));
+//	        System.out.println("采集计算的校验码是：" + ByteUtil.byteArrToHexString(new byte[] {crc}));
 	        
 	        if (crc!=check) {
 				// TODO 当硬件传来的数据有问题需要循环解码，暂时返回空
 	        	//	去掉头部,重新解码
 	        	//in.setIndex(4, in.writerIndex());
-	        	System.out.println("=========校验失败 源数据crc="+check+"   计算crc="+crc  );
+//	        	System.out.println("=========校验失败 源数据crc="+check+"   计算crc="+crc  );
 	        	return null;
 	        } else {
-	        	System.out.println("=========校验成功");
+//	        	System.out.println("=========校验成功");
 	        	in.readByte(); // 未声明校验位变量,为使下一次指令从头开始读取,需要重读校验位
 			}
 		}

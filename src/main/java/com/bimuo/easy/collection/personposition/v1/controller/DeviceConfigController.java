@@ -16,13 +16,9 @@ import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigAllParamNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigCodeNoneException;
-import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigUpdateFailedException;
-import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigUpdateTimeOutException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
-import com.bimuo.easy.collection.personposition.v1.service.util.DeviceConfigResponseMapping;
-import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
 
 /**
  * 读取修改设备配置控制器
@@ -116,6 +112,10 @@ public class DeviceConfigController {
 			findCode = oldDeviceId.equals(deviceId) ? oldDeviceId : deviceId;
 		} else {
 			findCode = oldDeviceId;
+		}
+		
+		for(int i=1;i<20;i++) {
+			Thread.sleep(1000);
 		}
 //		long startTime = System.currentTimeMillis();
 //		while (true) {
