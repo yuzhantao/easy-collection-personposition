@@ -31,36 +31,5 @@ public class PersonPositionMessageFactory {
 		msg[msg.length-1]=crc;
 		return msg;
 	}
-	
-	public byte[] createGUISMessage(
-		 PersonPositionMessage guis,
-		 byte state, 
-		 int length
-    ) {
-		byte[] result = new byte[10];
-		// 设置协议头
-		result[0]=(byte)HEADER1;
-		result[1]=(byte)HEADER2;
-		result[2]=(byte)HEADER3;
-		result[3]=(byte)HEADER4;
-		// 设置长度    先默认是5，如果到时候变了再改这个方法吧，反正长度作为参数传递进来了
-		byte[] bLen = ByteUtil.shortToByteArr((short)(length+4));
-		System.arraycopy(bLen, 0, result, 2, bLen.length);
-		// 设置主机编号
-		System.arraycopy(guis.getDevId(), 0, result, 4, 3);
-		// 设置命令字
-		result[9]=guis.getCommand();
-		// 状态，成功0,失败1
-		result[10]=state;
-		// 设置校验码
-		byte crc=0;
-		// crc：从包头到数据段累加和模256
-		for(int i=0;i<result.length-1;i++) {
-			crc+=result[i];
-		}
-		result[result.length-1]=crc;
-		
-		return result;
-    }
-	
+
 }

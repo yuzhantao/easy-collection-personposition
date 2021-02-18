@@ -230,7 +230,7 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(oldDeviceId);
 		if (channel == null) {
-			logger.error("code-channel表中不存在设备编号【{}】的管道", oldDeviceId);
+			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", oldDeviceId);
 		} else if (!channel.isActive() || !channel.isWritable()) {
 			logger.info("设备编号【{}】的管道不可用", oldDeviceId);
 		} else {
@@ -245,14 +245,14 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 					if (future.isSuccess()) {
 						logger.info("发送修改设备配置命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
 						// 更新code-channel映射表
-						if (StringUtils.isNotBlank(deviceId)) {
-							CodeMapping.getInstance().updateChannelMapping(oldDeviceId, deviceId);
-							if (CodeMapping.getInstance().getChannel(deviceId) == channel) {
-								logger.info("code-channel表中新映射key={},value={}", deviceId, channel);
-							} else {
-								logger.info("code-channel表更新失败!");
-							}
-						}
+//						if (StringUtils.isNotBlank(deviceId)) {
+//							CodeMapping.getInstance().updateChannelMapping(oldDeviceId, deviceId);
+//							if (CodeMapping.getInstance().getChannel(deviceId) == channel) {
+//								logger.info("code-channel表中新映射key={},value={}", deviceId, channel);
+//							} else {
+//								logger.info("code-channel表更新失败!");
+//							}
+//						}
 					} else {
 						logger.error("发送修改设备配置命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
 					}

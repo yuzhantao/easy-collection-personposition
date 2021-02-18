@@ -3,8 +3,10 @@ package com.bimuo.easy.collection.personposition.v1.service.util;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -17,6 +19,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
  *
  */
 public class CodeMapping {
+	protected final static Logger logger = LogManager.getLogger(CodeMapping.class);
 	public static ChannelGroup channels = new DefaultChannelGroup("ChannelGroup" + UUID.randomUUID(),
 			GlobalEventExecutor.INSTANCE);
 	private static ConcurrentHashMap<String, ChannelId> codeMappingList = new ConcurrentHashMap<>();
@@ -52,7 +55,12 @@ public class CodeMapping {
 			return null;
 		}
 		Channel channel = channels.find(codeMappingList.get(mappingKey));
-		return channel;
+		if(channel == null) {
+			logger.error("编号【{}】的管道已被系统删除!",mappingKey);
+			return channel;
+		} else {
+			return channel;
+		}
 	}
 
 	/**
@@ -83,6 +91,11 @@ public class CodeMapping {
 		codeMappingList.put(key, channel.id());
 	}
 
+	/**
+	 * 是否存在该映射
+	 * @param key
+	 * @return
+	 */
 	public boolean channelMappingContainsKey(String key) {
 		return codeMappingList.containsKey(key);
 	}
@@ -93,10 +106,9 @@ public class CodeMapping {
 	 * @param key 管道对应的关键字,此类中指设备编号
 	 * @return
 	 */
-	public Channel removeChannelMapping(String key) {
-		Channel channel = getChannel(key);
-		codeMappingList.remove(key);
-		return channel;
+	public ChannelId removeChannelMapping(String key) {
+		ChannelId channelId = codeMappingList.remove(key);
+		return channelId;
 	}
 
 	/**

@@ -175,6 +175,13 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				devices.get(i).setUpdateTime(new Date());
 				personPositionDeviceService.modify(devices.get(i));
 				logger.info("人员定位设备已断开{},设备状态为{}",ip,devices.get(i).getDeviceState());
+				// 离线时删除code-channel映射,以备修改配置使用
+				CodeMapping.getInstance().removeChannelMapping(devices.get(i).getDeviceCode());  // 避免断开连接时netty自动将管道清除
+				if(CodeMapping.getInstance().channelMappingContainsKey(devices.get(i).getDeviceCode()) == false) {
+					logger.info("复位后设备【{}】映射删除成功",devices.get(i).getDeviceCode());
+				} else {
+					logger.info("复位后设备【{}】映射删除失败或并无该记录",devices.get(i).getDeviceCode());
+				}
 			}
 		}
 		MDC.remove("ip");
@@ -202,7 +209,8 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		
 		// 添加管道并记录在code-channel映射表,以备修改硬件配置时,根据设备编号查询管道
 		// 需要判断连接的设备编号是否在映射表中
-		if(CodeMapping.getInstance().channelMappingContainsKey(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase())==false) {
+		if(CodeMapping.getInstance().channelMappingContainsKey(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase()) == false // 映射表里没有该映射
+			|| CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase()) == null) {          // 映射表里有编号但断线重连时netty将管道删除
 			// 新添加code-channel映射
 			CodeMapping.getInstance().addChannel(ctx.channel());
 			CodeMapping.getInstance().addChannelMapping(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),ctx.channel());
@@ -215,7 +223,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 //				logger.error("新修改的配置中设备编号为空!DeviceConfigResponse映射表更新失败!");
 //			}
 		} else {
-			logger.debug("code-channel表中存在该映射,设备编号={},管道={}",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase()));
+			logger.info("code-channel表中存在该映射,设备编号={},管道={}",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase()));
 		}
 		
 		byte[] data = msg.getData(); // 接收设备完整回复的指令
@@ -355,15 +363,15 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 //				}
 //
 //			});
-			// 回调函数监听是否发送成功
-			cf.addListener(new ChannelFutureListener() {
-				@Override
-				public void operationComplete(ChannelFuture future) throws Exception {
-					
-					logger.info("==========");
-					
-				}
-			});
+//			// 回调函数监听是否发送成功
+//			cf.addListener(new ChannelFutureListener() {
+//				@Override
+//				public void operationComplete(ChannelFuture future) throws Exception {
+//					
+//					logger.info("==========");
+//					
+//				}
+//			});
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase();
 			if(deviceConfigService.findByDeviceId(deviceId)== null) {
 				return;

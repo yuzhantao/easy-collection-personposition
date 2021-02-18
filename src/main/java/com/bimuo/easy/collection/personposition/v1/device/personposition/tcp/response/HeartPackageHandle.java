@@ -84,24 +84,24 @@ public class HeartPackageHandle implements IMessageHandle<PersonPositionMessage,
 //	}
 
 	private void sendMessageToPersonPosition(ChannelHandlerContext ctx, PersonPositionMessage msg, byte state, int length) {
-		byte[] datas = personPositionMessageFactory.createGUISMessage(msg, state, length);
-		ByteBuf bs = Unpooled.copiedBuffer(datas);
-		ChannelFuture cf = ctx.writeAndFlush(bs);
-
-		cf.addListener(new ChannelFutureListener() {
-			@NotProguard
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-				if (future.isSuccess()) {
-					logger.info("发送回复心跳命令成功 deviceCoe={} 下发命令={}", ByteUtil.byteArrToHexString(msg.getDevId()),
-							ByteUtil.byteArrToHexString(datas, true));
-					//PersonPositionWebSocket.sendMessage(JSON.toJSONString(vo), ip);
-				} else {
-					logger.error("发送回复心跳命令失败 deviceCoe={} 下发命令={}", ByteUtil.byteArrToHexString(msg.getDevId()),
-							ByteUtil.byteArrToHexString(datas, true));
-				}
-			}
-
-		});
+//		byte[] datas = personPositionMessageFactory.createGUISMessage(msg, state, length);
+//		ByteBuf bs = Unpooled.copiedBuffer(datas);
+//		ChannelFuture cf = ctx.writeAndFlush(bs);
+//
+//		cf.addListener(new ChannelFutureListener() {
+//			@NotProguard
+//			@Override
+//			public void operationComplete(ChannelFuture future) throws Exception {
+//				if (future.isSuccess()) {
+//					logger.info("发送回复心跳命令成功 deviceCoe={} 下发命令={}", ByteUtil.byteArrToHexString(msg.getDevId()),
+//							ByteUtil.byteArrToHexString(datas, true));
+//					//PersonPositionWebSocket.sendMessage(JSON.toJSONString(vo), ip);
+//				} else {
+//					logger.error("发送回复心跳命令失败 deviceCoe={} 下发命令={}", ByteUtil.byteArrToHexString(msg.getDevId()),
+//							ByteUtil.byteArrToHexString(datas, true));
+//				}
+//			}
+//
+//		});
 	}
 }
