@@ -92,13 +92,6 @@ public class HeartPackageHandle implements IMessageHandle<PersonPositionMessage,
 			@NotProguard
 			@Override
 			public void operationComplete(ChannelFuture future) throws Exception {
-//				InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-//				String ip = insocket.getAddress().getHostAddress();
-//				PersonPositionMessageVo vo = new PersonPositionMessageVo();
-//				vo.setCommand(ByteUtil.byteArrToHexString(new byte[] {msg.getCommand()}));
-//				vo.setDeviceCode(ByteUtil.byteArrToHexString(msg.getDevId()));
-//				vo.setDatas(ByteUtil.byteArrToHexString(datas));
-//				vo.setMode(PersonPositionMessageVo.SEND_MODE);
 				if (future.isSuccess()) {
 					logger.info("发送回复心跳命令成功 deviceCoe={} 下发命令={}", ByteUtil.byteArrToHexString(msg.getDevId()),
 							ByteUtil.byteArrToHexString(datas, true));

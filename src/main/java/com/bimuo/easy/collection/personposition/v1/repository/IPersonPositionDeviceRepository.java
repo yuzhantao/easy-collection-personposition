@@ -2,9 +2,11 @@ package com.bimuo.easy.collection.personposition.v1.repository;
 
 import java.util.List;
 
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 
 public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPositionDevice, String>, JpaSpecificationExecutor<PersonPositionDevice> {
@@ -36,4 +38,8 @@ public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPos
 	 * @return 在线离线的设备数量
 	 */
 	int countByDeviceStateAndIsEffective(String deviceState,boolean isEffective);
+	
+	@Modifying
+	@Query("update PersonPositionDevice m set m.deviceState=?1 where  m.isEffective=true")
+	void updateAllDeviceState(String deviceState);
 }
