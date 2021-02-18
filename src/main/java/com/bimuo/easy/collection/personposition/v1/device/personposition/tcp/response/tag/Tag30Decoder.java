@@ -42,7 +42,7 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			System.arraycopy(arrayTag, 0, bDiviceCode, 1, 3);
 			int iDiviceCode = ByteUtil.byteArrayToInt(bDiviceCode);
 			String tagCode = String.format("%06d", iDiviceCode).toUpperCase();
-			log.debug("tagCode=",tagCode);
+			log.debug("tagCode={}",tagCode);
 			
 			// 解activate-button2,各1位
 			//TODO 需要先&再移位,不然值会发生改变,下述需要修改,参考表标签10

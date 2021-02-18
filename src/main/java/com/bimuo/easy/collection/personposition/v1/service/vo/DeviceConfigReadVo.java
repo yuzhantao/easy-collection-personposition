@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Pingfan
  *
  */
-public class DeviceConfigReadVo implements Serializable{
+public class DeviceConfigReadVo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
