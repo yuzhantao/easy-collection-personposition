@@ -113,10 +113,7 @@ public class DeviceConfigController {
 		} else {
 			findCode = oldDeviceId;
 		}
-		
-		for(int i=1;i<20;i++) {
-			Thread.sleep(1000);
-		}
+		return ResponseEntity.ok("修改配置成功!");
 //		long startTime = System.currentTimeMillis();
 //		while (true) {
 //			Thread.sleep(1000);
@@ -130,28 +127,28 @@ public class DeviceConfigController {
 //				DeviceConfigResponseMapping.getInstance().removeResponseMapping(findCode); // 找到后删除该编号map记录
 //				AssertUtils.checkArgument(endTime - startTime <= UPDATE_OVERTIME, new DeviceConfigUpdateTimeOutException());	
 				// 4.修改数据库中对应硬件配置
-				PersonPositionDevice dev = this.personPositionDeviceService.getOneByDeviceCode(findCode); // 修改需要先查询
-				if(dev == null) { // 修改编号
+//				PersonPositionDevice dev = this.personPositionDeviceService.getOneByDeviceCode(findCode); // 修改需要先查询
+//				if(dev == null) { // 修改编号
 //					if(DeviceConfigResponseMapping.getInstance().getUpdateConfigState(deviceId).equals("updatedAndReset")) {
 //						DeviceConfigReadVo config = deviceConfigService.updateConfig(oldDeviceId, deviceId, cain1, cain2,
 //								airBaudrate, baudrate, buzzType, ioInput, critical, filterTagTime, sendInterval, tagType,
 //								crcEn);
 //						Preconditions.checkArgument(config != null, new DeviceConfigUpdateFailedException());
 //						return ResponseEntity.ok(config);
-						log.info("==========数据库【增加】设备编号【{}】配置信息成功!",deviceId);
-						return ResponseEntity.ok("增加设备成功!");
+//						log.info("==========数据库【增加】设备编号【{}】配置信息成功!",deviceId);
+//						return ResponseEntity.ok("增加设备成功!");
 //					} else {
 //						log.info("==========修改设备配置时,数据库设备编号修改失败!请重试!");
 //					}
-				} else { // 修改其它属性未修改编号
+//				} else { // 修改其它属性未修改编号
 //					DeviceConfigReadVo config = deviceConfigService.updateConfig(oldDeviceId, deviceId, cain1, cain2,
 //							airBaudrate, baudrate, buzzType, ioInput, critical, filterTagTime, sendInterval, tagType,
 //							crcEn);
 //					Preconditions.checkArgument(config != null, new DeviceConfigUpdateFailedException());
 //					return ResponseEntity.ok(config);
-					log.info("==========数据库【修改】设备编号【{}】配置信息成功!",oldDeviceId);
-					return ResponseEntity.ok("修改配置成功!");
-				}
+//					log.info("==========数据库【修改】设备编号【{}】配置信息成功!",oldDeviceId);
+//					return ResponseEntity.ok("修改配置成功!");
+//				}
 			}
 //		}
 //	}

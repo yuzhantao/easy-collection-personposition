@@ -79,8 +79,7 @@ public class PersonPositionDecoder extends LengthFieldBasedFrameDecoder {
 	protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
 //		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 //		String ip = insocket.getAddress().getHostAddress();
-		if (in == null) {
-//			logger.info("threadId=" + Thread.currentThread().getId() + "return null;");
+		if(in==null) {
 			return null;
 		}
 		in.markReaderIndex(); // 设置读标记
@@ -128,6 +127,7 @@ public class PersonPositionDecoder extends LengthFieldBasedFrameDecoder {
 //			System.out.println("指令长度是："+dataLen);
 			
 			in.readBytes(this.devId); // 设备编号
+			
 //			System.out.println("设备编号是："+ByteUtil.byteArrToHexString(devId));
 			
 			this.command = in.readByte(); // 命令

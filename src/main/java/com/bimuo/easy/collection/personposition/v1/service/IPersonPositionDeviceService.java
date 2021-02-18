@@ -96,4 +96,8 @@ public interface IPersonPositionDeviceService {
 	 */
 	List<BrandInfo> toExcel(Date startTime,Date endTime);
 
+	/**
+	 * 更新有效设备的状态为离线
+	 */
+	void updateDeviceOffline();
 }

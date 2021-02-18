@@ -180,4 +180,9 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 		}
 		return excelInfo;
 	}
+
+	@Override
+	public void updateDeviceOffline() {
+		personPositionDeviceRepository.updateAllDeviceState("offline");
+	}
 }
