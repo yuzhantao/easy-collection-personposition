@@ -7,6 +7,7 @@ import com.bimuo.easy.collection.personposition.core.message.IMessageHandleFacto
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.coder.PersonPositionDecoder;
 import com.bimuo.easy.collection.personposition.v1.mqtt.IMqttMessageSenderService;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
+import com.bimuo.easy.collection.personposition.v1.service.IDeviceSettingService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
@@ -19,7 +20,10 @@ public class PersonPositionMessageHandleFactory implements IMessageHandleFactory
 	PersonPositionEventBusService personPositionEventBusService;
 	
 	@Autowired
-	IDeviceConfigService deviceCodeService;
+	IDeviceConfigService deviceConfigService;
+	
+	@Autowired
+	IDeviceSettingService deviceSettingService;
 	
 	@Autowired
 	IPersonPositionDeviceService personPositionDeviceService;
@@ -37,7 +41,7 @@ public class PersonPositionMessageHandleFactory implements IMessageHandleFactory
 
 	@Override
 	public ChannelHandler createMessageHandle() {
-		return new PersonPositionResponseHandleContext(personPositionEventBusService,deviceCodeService,personPositionDeviceService,tagHistoryService,mqttMessageSenderService);
+		return new PersonPositionResponseHandleContext(personPositionEventBusService, deviceConfigService, deviceSettingService, personPositionDeviceService, tagHistoryService, mqttMessageSenderService);
 	}
 
 }

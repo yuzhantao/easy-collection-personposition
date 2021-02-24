@@ -14,6 +14,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
+import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 /**
@@ -74,6 +75,13 @@ public class PersonPositionDevice {
 	@Type(type = "json")
 	@Column(columnDefinition = "json")
 	private DeviceConfigReadVo deviceConfig;
+	
+	/**
+	 * 设备综合配置
+	 */
+	@Type(type = "json")
+	@Column(columnDefinition = "json")
+	private DeviceSettingVo deviceSetting;
 	
 	/**
 	 * 记录是否有效
@@ -142,6 +150,14 @@ public class PersonPositionDevice {
 
 	public void setDeviceConfig(DeviceConfigReadVo deviceConfig) {
 		this.deviceConfig = deviceConfig;
+	}
+
+	public DeviceSettingVo getDeviceSetting() {
+		return deviceSetting;
+	}
+
+	public void setDeviceSetting(DeviceSettingVo deviceSetting) {
+		this.deviceSetting = deviceSetting;
 	}
 
 	public boolean isEffective() {

@@ -3,7 +3,8 @@ package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.me
 import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 /**
  * 消息工厂 生成发送给硬件的指令
- * @author Pingfan
+ * 
+ * @author yuzhantao
  *
  */
 public class PersonPositionMessageFactory {
@@ -31,5 +32,4 @@ public class PersonPositionMessageFactory {
 		msg[msg.length-1]=crc;
 		return msg;
 	}
-
 }

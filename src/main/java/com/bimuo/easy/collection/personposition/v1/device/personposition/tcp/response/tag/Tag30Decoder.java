@@ -36,7 +36,6 @@ public class Tag30Decoder implements ITagDecoder<Tag30Vo> {
 			System.arraycopy(msg.getData(), i, arrayTag, 0, arrayTag.length);
 			log.debug("标签的二进制指令为{}",ByteUtil.byteArrToHexString(arrayTag));
 			
-			// TODO tagId大写
 			// 解tagId,3字节
 			byte[] bDiviceCode = new byte[4];
 			System.arraycopy(arrayTag, 0, bDiviceCode, 1, 3);

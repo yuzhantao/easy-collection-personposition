@@ -368,7 +368,7 @@ public class ByteUtil {
 	}
 	
 	/**
-     * 鎶奍P鍦板潃杞�?寲涓哄瓧鑺傛暟缁�?
+     * ip地址转成byte数组
      * @param ipAddr
      * @return byte[]
      */
