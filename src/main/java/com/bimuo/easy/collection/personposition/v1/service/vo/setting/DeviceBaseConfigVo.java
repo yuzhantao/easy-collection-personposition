@@ -1,4 +1,4 @@
-package com.bimuo.easy.collection.personposition.v1.service.vo;
+package com.bimuo.easy.collection.personposition.v1.service.vo.setting;
 
 import java.io.Serializable;
 
@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Pingfan
  *
  */
-public class DeviceConfigReadVo implements Serializable {
+public class DeviceBaseConfigVo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	

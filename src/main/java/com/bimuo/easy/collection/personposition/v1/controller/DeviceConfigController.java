@@ -23,6 +23,7 @@ import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceSettingService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
+import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port0Vo;
@@ -62,71 +63,91 @@ public class DeviceConfigController {
 	public ResponseEntity<?> queryDeviceConfig(@PathVariable String deviceId) throws Exception{
 		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
 		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
-		return ResponseEntity.ok(ppd.getDeviceConfig());
+		return ResponseEntity.ok(ppd.getDeviceSetting().getBaseConfig());
 	}
 	
 	/**
-	 * 修改设备配置
-	 * 
-	 * @param oldDeviceId   原本的设备编号
-	 * @param deviceId      修改的设备编号
-	 * @param cain1         发送增益,范围0~3
-	 * @param cain2         接收增益,范围0~31
-	 * @param airBaudrate   空中波特率,范围0~2(0:250K, 1:1M, 2:2M)
-	 * @param baudrate      串口波特率,范围0~6(4800~115200)
-	 * @param buzzType      蜂鸣器状态,范围0~1(0:关,1:开)
-	 * @param ioInput       地感值,范围0~1(0:无地感,1:有地感)
-	 * @param critical      两秒内接收到的同一个ID的次数阀值,范围0~8
-	 * @param filterTagTime 同一个ID的过滤时间,单位秒,范围0~250
-	 * @param sendInterval  两个韦根数据的发送间隔,单位0.1秒,范围0~250
-	 * @param tagType       标签类型,范围0~255
-	 * @param crcEn         设备CRC状态,范围0~1(0:取消,1:有效)
-	 * @return 修改成功字符串
+	 * 读取网络参数
+	 * @param deviceId 设备编号
+	 * @return 网络参数实体
 	 * @throws Exception
 	 */
-	@PutMapping(value = "/{oldDeviceId}/config")
-	public ResponseEntity<?> updateDeviceConfig(
-			@PathVariable("oldDeviceId") String oldDeviceId,
-			@RequestParam(required = false) String deviceId, 
-			@RequestParam(required = false) Byte cain1, // Spring接受参数的时候,基本数据类型需要改为包装类,或添加defaultValue,只加required=false是没用的
-			@RequestParam(required = false) Byte cain2, 
-			@RequestParam(required = false) Byte airBaudrate,
-			@RequestParam(required = false) Byte baudrate, 
-			@RequestParam(required = false) Byte buzzType,
-			@RequestParam(required = false) Byte ioInput, 
-			@RequestParam(required = false) Byte critical,
-			@RequestParam(required = false) Byte filterTagTime, 
-			@RequestParam(required = false) Byte sendInterval,
-			@RequestParam(required = false) Byte tagType, 
-			@RequestParam(required = false) Byte crcEn)
-			throws Exception {
-		// 1.先判断参数是否全空,是则停止修改报异常
-		// TODO 控制参数范围,仅判空不够
-		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
-		AssertUtils.checkArgument(cain1 != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(cain2 != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(airBaudrate != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(baudrate != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(buzzType != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(ioInput != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(critical != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(filterTagTime != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(sendInterval != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(tagType != null,new DeviceConfigAllParamNoneException());
-		AssertUtils.checkArgument(crcEn != null,new DeviceConfigAllParamNoneException());
-
-		// 2.修改硬件配置
-		deviceConfigService.updateHardwareConfig(oldDeviceId, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType,
-				ioInput, critical, filterTagTime, sendInterval, tagType, crcEn);
+	@GetMapping("/{deviceId}/networkParams")
+	public ResponseEntity<?> queryDeviceNetworkParams(@PathVariable String deviceId) throws Exception{
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
+		return ResponseEntity.ok(ppd.getDeviceSetting().getNetworkParams());
+	}
+	
+	/**
+	 * 读取端口0
+	 * @param deviceId 设备编号
+	 * @return 端口0实体
+	 * @throws Exception
+	 */
+	@GetMapping("/{deviceId}/port0")
+	public ResponseEntity<?> queryDevicePort0(@PathVariable String deviceId) throws Exception{
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
+		return ResponseEntity.ok(ppd.getDeviceSetting().getPort0());
+	}
+	
+	/**
+	 * 读取端口1
+	 * @param deviceId 设备编号
+	 * @return 端口1实体
+	 * @throws Exception
+	 */
+	@GetMapping("/{deviceId}/port1")
+	public ResponseEntity<?> queryDevicePort1(@PathVariable String deviceId) throws Exception{
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
+		return ResponseEntity.ok(ppd.getDeviceSetting().getPort1());
+	}
+	
+//	@PutMapping(value = "/{oldDeviceId}/config")
+//	public ResponseEntity<?> updateDeviceConfig(
+//			@PathVariable("oldDeviceId") String oldDeviceId,
+//			@RequestParam(required = false) String deviceId, 
+//			@RequestParam(required = false) Byte cain1, // Spring接受参数的时候,基本数据类型需要改为包装类,或添加defaultValue,只加required=false是没用的
+//			@RequestParam(required = false) Byte cain2, 
+//			@RequestParam(required = false) Byte airBaudrate,
+//			@RequestParam(required = false) Byte baudrate, 
+//			@RequestParam(required = false) Byte buzzType,
+//			@RequestParam(required = false) Byte ioInput, 
+//			@RequestParam(required = false) Byte critical,
+//			@RequestParam(required = false) Byte filterTagTime, 
+//			@RequestParam(required = false) Byte sendInterval,
+//			@RequestParam(required = false) Byte tagType, 
+//			@RequestParam(required = false) Byte crcEn)
+//			throws Exception {
+//		// 1.先判断参数是否全空,是则停止修改报异常
+//		// TODO 控制参数范围,仅判空不够
+//		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
+//		AssertUtils.checkArgument(cain1 != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(cain2 != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(airBaudrate != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(baudrate != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(buzzType != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(ioInput != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(critical != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(filterTagTime != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(sendInterval != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(tagType != null,new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(crcEn != null,new DeviceConfigAllParamNoneException());
+//
+//		// 2.修改硬件配置
+//		deviceConfigService.updateHardwareConfig(oldDeviceId, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType,
+//				ioInput, critical, filterTagTime, sendInterval, tagType, crcEn);
 
 		// 3.开线程轮询设备回复的消息记录表,map中没有设备编号或者超时就停止轮询
-		String findCode = new String();
-		if(StringUtils.isNotBlank(deviceId)) {
-			findCode = oldDeviceId.equals(deviceId) ? oldDeviceId : deviceId;
-		} else {
-			findCode = oldDeviceId;
-		}
-		return ResponseEntity.ok("修改配置成功!");
+//		String findCode = new String();
+//		if(StringUtils.isNotBlank(deviceId)) {
+//			findCode = oldDeviceId.equals(deviceId) ? oldDeviceId : deviceId;
+//		} else {
+//			findCode = oldDeviceId;
+//		}
+//		return ResponseEntity.ok("修改配置指令下发成功!");
 //		long startTime = System.currentTimeMillis();
 //		while (true) {
 //			Thread.sleep(1000);
@@ -162,16 +183,40 @@ public class DeviceConfigController {
 //					log.info("==========数据库【修改】设备编号【{}】配置信息成功!",oldDeviceId);
 //					return ResponseEntity.ok("修改配置成功!");
 //				}
-			}
+//			}
 //		}
 //	}
 	
+
+	/**
+	 * 修改设备配置
+	 * 
+	 * @param deviceId 设备编号
+	 * @param json     设备配置的json
+	 * @return         修改设备配置指令下发成功字符串
+	 * @throws Exception
+	 */
+	@PutMapping(value = "/{deviceId}/baseConfig")
+	public ResponseEntity<?> updateBaseConfig(
+			@PathVariable("deviceId") String deviceId,
+			@RequestBody String json) throws Exception {
+		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
+		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
+		DeviceBaseConfigVo baseConfig = JSONObject.parseObject(json, DeviceBaseConfigVo.class);
+		// 发修改网络参数命令给硬件
+		deviceConfigService.updateHardwareBaseConfig(deviceId, baseConfig.getDeviceId(), baseConfig.getCain1(), baseConfig.getCain2(), 
+				baseConfig.getAirBaudrate(), baseConfig.getBaudrate(), baseConfig.getBuzzType(), baseConfig.getIoInput(),
+				baseConfig.getCritical(), baseConfig.getFilterTagTime(), baseConfig.getSendInterval(), baseConfig.getTagType(), baseConfig.getCrcEn());
+		// 复位重连后,通过轮询配置自动更新数据库
+		return ResponseEntity.ok("修改设备配置指令下发成功!");
+	}
+
 	/**
 	 * 修改网络参数
 	 * 
 	 * @param deviceId 设备编号
 	 * @param json 网络参数的json
-	 * @return 网络参数实体
+	 * @return     修改网络参数指令下发成功字符串
 	 * @throws Exception
 	 */
 	@PutMapping(value = "/{deviceId}/networkParams")
@@ -184,15 +229,15 @@ public class DeviceConfigController {
 		// 发修改网络参数命令给硬件
 		deviceSettingService.updateHardwareNetworkParams(deviceId, networkParams.getSourceIp(), networkParams.getSubnetMask(), networkParams.getGatway(), networkParams.getSourceHardware());
 		// 复位重连后,通过轮询配置自动更新数据库
-		return ResponseEntity.ok(networkParams);
+		return ResponseEntity.ok("修改网络参数指令下发成功!");
 	}
 	
 	/**
 	 * 修改端口0配置
 	 * 
 	 * @param deviceId 设备编号
-	 * @param json port0的json
-	 * @return 修改成功字符串
+	 * @param json     port0的json
+	 * @return         修改端口0指令下发成功字符串
 	 * @throws Exception
 	 */
 	@PutMapping(value = "/{deviceId}/port0")
@@ -205,15 +250,15 @@ public class DeviceConfigController {
 		// 发修改端口1命令给硬件
 		deviceSettingService.updateHardwarePortConfig(deviceId, port0.getPortType(), port0.getSocket0DIP(), port0.getDPort(), port0.getSPort(), port0.getMode(), port0.getEnable());
 		// 复位重连后,通过轮询配置自动更新数据库
-		return ResponseEntity.ok(port0);
+		return ResponseEntity.ok("修改端口0指令下发成功!");
 	}
 	
 	/**
 	 * 修改端口1配置
 	 * 
 	 * @param deviceId 设备编号
-	 * @param json port1的json
-	 * @return 修改成功字符串
+	 * @param json     port1的json
+	 * @return         修改端口1指令下发成功字符串
 	 * @throws Exception
 	 */
 	@PutMapping(value = "/{deviceId}/port1")
@@ -226,15 +271,15 @@ public class DeviceConfigController {
 		// 发修改端口1命令给硬件
 		deviceSettingService.updateHardwarePortConfig(deviceId, port1.getPortType(), port1.getSocket0DIP(), port1.getDPort(), port1.getSPort(), port1.getMode(), port1.getEnable());
 		// 复位重连后,通过轮询配置自动更新数据库
-		return ResponseEntity.ok(port1);
+		return ResponseEntity.ok("修改端口1指令下发成功!");
 	}
 	
 	/**
 	 * 修改端口2配置
 	 * 
 	 * @param deviceId 设备编号
-	 * @param json port2的json
-	 * @return 修改成功字符串
+	 * @param json     port2的json
+	 * @return         修改端口2指令下发成功字符串
 	 * @throws Exception
 	 */
 //	@PutMapping(value = "/{deviceId}/port2")
@@ -247,15 +292,15 @@ public class DeviceConfigController {
 //		// 发修改端口1命令给硬件
 //		deviceSettingService.updateHardwarePortConfig(deviceId, port2.getPortType(), port2.getSocket0DIP(), port2.getDPort(), port2.getSPort(), port2.getMode(), port2.getEnable());
 //		// 复位重连后,通过轮询配置自动更新数据库
-//		return ResponseEntity.ok(port2);
+//		return ResponseEntity.ok("修改端口2指令下发成功!");
 //	}
 	
 	/**
 	 * 修改端口3配置
 	 * 
 	 * @param deviceId 设备编号
-	 * @param json port3的json
-	 * @return 修改成功字符串
+	 * @param json     port3的json
+	 * @return         修改端口3指令下发成功字符串
 	 * @throws Exception
 	 */
 //	@PutMapping(value = "/{deviceId}/port3")
@@ -268,6 +313,6 @@ public class DeviceConfigController {
 //		// 发修改端口1命令给硬件
 //		deviceSettingService.updateHardwarePortConfig(deviceId, port3.getPortType(), port3.getSocket0DIP(), port3.getDPort(), port3.getSPort(), port3.getMode(), port3.getEnable());
 //		// 复位重连后,通过轮询配置自动更新数据库
-//		return ResponseEntity.ok(port3);
+//		return ResponseEntity.ok("修改端口3指令下发成功!");
 //	}
 }

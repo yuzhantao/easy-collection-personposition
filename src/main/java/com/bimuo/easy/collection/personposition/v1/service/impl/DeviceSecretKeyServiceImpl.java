@@ -21,10 +21,16 @@ import io.netty.channel.ChannelFutureListener;
 public class DeviceSecretKeyServiceImpl implements IDeviceSecretKeyService {
 	private static final Logger logger = LogManager.getLogger(DeviceSettingServiceImpl.class);
 
-	@Override
-	public void updateHardwareSecretKey(String deviceId, String oldPassword, String newPassword) {
+	/**
+	 * 设置发送给硬件的更改密钥指令data段
+	 * @param deviceId     设备编号
+	 * @param oldPassword  旧密钥
+	 * @param newPassword  新密钥
+	 * @return 发送给硬件的指令data段
+	 */
+	private byte[] setSecretKeyCommand(String deviceId, String oldPassword, String newPassword) {
 		// Controller已判断参数全空,此处不需要
-		// 发送给硬件更改密钥的指令,参考协议4D
+		// 发送给硬件更改密钥的指令,参考协议4D,4E,4F
 		byte[] dataArr = new byte[16]; // data段16字节
 		// 设置各参数
 		if (StringUtils.isNotBlank(oldPassword) && oldPassword.length() == 8) {
@@ -39,9 +45,15 @@ public class DeviceSecretKeyServiceImpl implements IDeviceSecretKeyService {
 		} else {
 			new DeviceSecretKeyFormatException();
 		}
-
-		byte[] command = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes(deviceId), (byte) 0x4D, dataArr);
-		logger.info("向硬件发送的更改密钥指令是{}", ByteUtil.byteArrToHexString(command, true));
+		return dataArr;
+	}
+	
+	/**
+	 * 发送更改密钥的指令给硬件
+	 * @param deviceId 设备编号
+	 * @param command  更改密钥的指令
+	 */
+	private void sendCommandToHardware(String deviceId, byte[] command) {
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
 		if (channel == null) {
@@ -64,7 +76,29 @@ public class DeviceSecretKeyServiceImpl implements IDeviceSecretKeyService {
 				}
 			});
 		}
-
+	}
+	
+	@Override
+	public void updateHardwareSecretKey1(String deviceId, String oldPassword, String newPassword) {
+		byte[] dataArr = setSecretKeyCommand(deviceId, oldPassword, newPassword);
+		byte[] command = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes(deviceId), (byte) 0x4D,dataArr);
+		logger.info("向硬件发送的更改密钥1指令是{}", ByteUtil.byteArrToHexString(command, true));
+		sendCommandToHardware(deviceId, command);
 	}
 
+	@Override
+	public void updateHardwareSecretKey2(String deviceId, String oldPassword, String newPassword) {
+		byte[] dataArr = setSecretKeyCommand(deviceId, oldPassword, newPassword);
+		byte[] command = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes(deviceId), (byte) 0x4E,dataArr);
+		logger.info("向硬件发送的更改密钥2指令是{}", ByteUtil.byteArrToHexString(command, true));
+		sendCommandToHardware(deviceId, command);
+	}
+
+	@Override
+	public void updateHardwareSecretKey3(String deviceId, String oldPassword, String newPassword) {
+		byte[] dataArr = setSecretKeyCommand(deviceId, oldPassword, newPassword);
+		byte[] command = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes(deviceId), (byte) 0x4F,dataArr);
+		logger.info("向硬件发送的更改密钥3指令是{}", ByteUtil.byteArrToHexString(command, true));
+		sendCommandToHardware(deviceId, command);
+	}
 }

@@ -22,7 +22,8 @@ import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDev
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
-import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
+import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
+import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.google.common.base.Preconditions;
 
 import io.netty.buffer.ByteBuf;
@@ -40,7 +41,7 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 	@Autowired
 	private IPersonPositionDeviceService personPositionDeviceService;
 
-	Map<String, DeviceConfigReadVo> map = new HashMap<String, DeviceConfigReadVo>();
+	Map<String, DeviceBaseConfigVo> map = new HashMap<String, DeviceBaseConfigVo>();
 
 	private PersonPositionMessageFactory personPositionMessageFactory = new PersonPositionMessageFactory();
 	Executor executor = Executors.newCachedThreadPool();
@@ -61,20 +62,10 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 	 * @param tagType       标签类型,范围0~255
 	 * @param crcEn         设备CRC状态,范围0~1(0:取消,1:有效)
 	 */
-	private void setDeviceProperty(
-			DeviceConfigReadVo config, 
-			String deviceId, 
-			Byte cain1, 
-			Byte cain2, 
-			Byte airBaudrate,
-			Byte baudrate, 
-			Byte buzzType, 
-			Byte ioInput, 
-			Byte critical, 
-			Byte filterTagTime, 
-			Byte sendInterval,
-			Byte tagType, 
-			Byte crcEn) {
+	private void setDeviceProperty(DeviceBaseConfigVo config, 
+			String deviceId, Byte cain1, Byte cain2, Byte airBaudrate,
+			Byte baudrate, Byte buzzType, Byte ioInput, Byte critical, 
+			Byte filterTagTime, Byte sendInterval, Byte tagType, Byte crcEn) {
 		if (StringUtils.isNotBlank(deviceId)) {
 			config.setDeviceId(deviceId);
 		}
@@ -114,38 +105,26 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 	}
 
 	@Override
-	public DeviceConfigReadVo readConfig(String deviceId) {
+	public DeviceBaseConfigVo readConfig(String deviceId) {
 		PersonPositionDevice ppd = this.personPositionDeviceRepository.getOneByDeviceCode(deviceId);
-		logger.info("==========【查询】设备编号【{}】配置信息成功!", deviceId);
-		return ppd.getDeviceConfig();
+		return ppd.getDeviceSetting().getBaseConfig();
 	}
 
 	@Override
-	public void addMemory(PersonPositionMessage msg, DeviceConfigReadVo dconfig) {
+	public void addMemory(PersonPositionMessage msg, DeviceBaseConfigVo dconfig) {
 		map.put(ByteUtil.byteArrToHexString(msg.getDevId()), dconfig);
 	}
 
 	@Override
-	public DeviceConfigReadVo findByDeviceId(String deviceId) {
+	public DeviceBaseConfigVo findByDeviceId(String deviceId) {
 		return map.get(deviceId);
 	}
 
 	@Override
-	public DeviceConfigReadVo updateConfig(
-			String oldDeviceId, 
-			String deviceId, 
-			Byte cain1, 
-			Byte cain2,
-			Byte airBaudrate, 
-			Byte baudrate, 
-			Byte buzzType, 
-			Byte ioInput, 
-			Byte critical, 
-			Byte filterTagTime,
-			Byte sendInterval, 
-			Byte tagType, 
-			Byte crcEn) {
-		DeviceConfigReadVo config = new DeviceConfigReadVo();
+	public DeviceBaseConfigVo updateBaseConfig(String oldDeviceId, String deviceId, Byte cain1, Byte cain2,
+			Byte airBaudrate, Byte baudrate, Byte buzzType, Byte ioInput, 
+			Byte critical, Byte filterTagTime,Byte sendInterval, Byte tagType, Byte crcEn) {
+		DeviceBaseConfigVo config = new DeviceBaseConfigVo();
 		// 判断用于查询的编号是否为空
 		Preconditions.checkArgument(StringUtils.isNotBlank(oldDeviceId), new DeviceCodeNoneException());
 		PersonPositionDevice oldDevice = this.personPositionDeviceRepository.getOneByDeviceCode(oldDeviceId);
@@ -154,13 +133,13 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			setDeviceProperty(config, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType, ioInput, critical,
 					filterTagTime, sendInterval, tagType, crcEn);
 			// 更新原先记录
-			oldDevice.setDeviceConfig(config);
+			oldDevice.getDeviceSetting().setBaseConfig(config);
 			personPositionDeviceService.modify(oldDevice);
-			if (oldDevice.getDeviceCode().equals(oldDevice.getDeviceConfig().getDeviceId())) {
+			if (oldDevice.getDeviceCode().equals(oldDevice.getDeviceSetting().getBaseConfig().getDeviceId())) {
 				logger.debug("==========数据库【修改】设备编号【{}】配置信息成功!", oldDevice.getDeviceCode());
 			} else {
 				logger.error("==========数据库【修改】设备编号【{}】配置信息失败!设备编号【{}】与配置中编号【{}】不一致!", oldDevice.getDeviceCode(),
-						oldDevice.getDeviceCode(), oldDevice.getDeviceConfig().getDeviceId());
+						oldDevice.getDeviceCode(), oldDevice.getDeviceSetting().getBaseConfig().getDeviceId());
 				new DeviceConfigDeviceIdException();
 			}
 			return config;
@@ -176,16 +155,16 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			newDevice.setDeviceState(oldDevice.getDeviceState());
 			setDeviceProperty(config, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType, ioInput, critical,
 					filterTagTime, sendInterval, tagType, crcEn);
-			newDevice.setDeviceConfig(config);
+			newDevice.getDeviceSetting().setBaseConfig(config);
 			newDevice.setEffective(true);
 			// 添加新设备的记录
 			personPositionDeviceService.insert(newDevice);
 			// 注意String存的是地址,用equals判断值是否相同
-			if (newDevice.getDeviceCode().equals(newDevice.getDeviceConfig().getDeviceId())) {
+			if (newDevice.getDeviceCode().equals(newDevice.getDeviceSetting().getBaseConfig().getDeviceId())) {
 				logger.info("==========【修改】设备编号【{}】配置信息成功!", newDevice.getDeviceCode());
 			} else {
 				logger.error("==========【修改】设备编号【{}】配置信息失败!设备编号【{}】与配置中编号【{}】不一致!", newDevice.getDeviceCode(),
-						newDevice.getDeviceCode(), newDevice.getDeviceConfig().getDeviceId());
+						newDevice.getDeviceCode(), newDevice.getDeviceSetting().getBaseConfig().getDeviceId());
 				new DeviceConfigDeviceIdException();
 			}
 			return config;
@@ -193,20 +172,9 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 	}
 
 	@Override
-	public void updateHardwareConfig(
-			String oldDeviceId, 
-			String deviceId, 
-			Byte cain1, 
-			Byte cain2, 
-			Byte airBaudrate,
-			Byte baudrate, 
-			Byte buzzType, 
-			Byte ioInput, 
-			Byte critical, 
-			Byte filterTagTime, 
-			Byte sendInterval,
-			Byte tagType, 
-			Byte crcEn) {
+	public void updateHardwareBaseConfig(String oldDeviceId, String deviceId, Byte cain1, Byte cain2, 
+			Byte airBaudrate,Byte baudrate, Byte buzzType, Byte ioInput, 
+			Byte critical, Byte filterTagTime, Byte sendInterval, Byte tagType, Byte crcEn) {
 		// Controller已判断参数全空,此处不需要
 		// 发送给硬件修改配置的指令,参考协议43
 		byte[] dataArr = new byte[14]; // data段14字节

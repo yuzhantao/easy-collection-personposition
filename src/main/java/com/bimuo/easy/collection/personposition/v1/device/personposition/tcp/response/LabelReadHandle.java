@@ -8,9 +8,7 @@ import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessageFactory;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
-//import com.bimuo.easy.collection.personposition.v1.service.vo.RU2000RealtimeTagVo;
-//import com.bimuo.easy.collection.personposition.v1.service.vo.RU2000RealtimeTagVo.Tag;
-import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
+import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
 
 import io.netty.channel.ChannelHandlerContext;
 
@@ -47,7 +45,7 @@ public class LabelReadHandle implements IMessageHandle<PersonPositionMessage, Ob
 	@Override
 	public Object handle(ChannelHandlerContext ctx, PersonPositionMessage t) {
 		//将PersonPositionMessage转换为DeviceConfigReadVo
-		DeviceConfigReadVo configVo = new DeviceConfigReadVo();
+		DeviceBaseConfigVo configVo = new DeviceBaseConfigVo();
 //		//把devId转为deviceCode
 		configVo.setDeviceId(ByteUtil.byteArrToHexString(t.getDevId()));
 //		//将data转换为list集合,再存到list<Tag>

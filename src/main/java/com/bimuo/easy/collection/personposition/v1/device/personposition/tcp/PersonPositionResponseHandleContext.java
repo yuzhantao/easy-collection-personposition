@@ -56,7 +56,7 @@ import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDevice
 import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
 import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
-import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
+import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port0Vo;
@@ -208,6 +208,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		super.channelInactive(ctx);
 	}
 
+	long startTime = System.currentTimeMillis();
 	
 	@NotProguard
 	@Override
@@ -238,7 +239,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		byte[] data = msg.getData(); // 接收设备完整回复的指令
 		
 		byte[] deviceIdArray = msg.getDevId(); // 单独复制设备编号指令段以便查询,从而修改状态,deviceId两字节
-
+		
 		if(msg.getCommand() == 0x43) { // 0x43协议用来修改设备配置
 			// 设置成功则设备回复:Data[] = 'OK(4F4B)',失败没反应,CheckSum为任意值
 			if(ByteUtil.byteArrToHexString(data).equals("4F4B")) {
@@ -488,9 +489,17 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				logger.info("======未识别设备回复的网络配置信息,协议为47");
 			}	
 		}
+		if (msg.getCommand() == 0x4D) { // 0x4D协议用来更改密钥1
+			
+		}
+		if (msg.getCommand() == 0x4E) { // 0x4E协议用来更改密钥1
+			
+		}
+		if (msg.getCommand() == 0x4F) { // 0x4F协议用来更改密钥1
+	
+		}
 		if (msg.getCommand() == 0x44) { // 0x44协议用来读取设备配置
 			logger.debug("==========设备回复指令的协议是:" + msg.getCommand() + " " + "Data段是:" + ByteUtil.byteArrToHexString(data));
-			
 			// 1.处理设备信息
 			// 一旦设备连接,查到设备则更新数据库设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
 			PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
@@ -517,7 +526,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			
 			// 2.处理设备配置信息
 			// 更新数据库配置信息,连接读取配置时设备编号既是旧编号也是新编号
-			DeviceConfigReadVo dconfig = deviceConfigService.updateConfig(
+			DeviceBaseConfigVo dconfig = deviceConfigService.updateBaseConfig(
 					ByteUtil.byteArrToHexString (deviceIdArray).toUpperCase(),
 					ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase(), // 设备id,回复的消息msg和Data[]段都有,msg取较方便
 					data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], 
@@ -526,7 +535,9 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			
 			// 更新配置
 			PersonPositionDevice device = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
-			device.setDeviceConfig(dconfig);
+			DeviceSettingVo dsetting = device.getDeviceSetting();
+			dsetting.setBaseConfig(dconfig);
+			device.setDeviceSetting(dsetting);
 			personPositionDeviceService.modify(device);
 			
 			// 发送配置信息到MQTT,便于页面展示 接收地址是配置文件中mqtt.host 默认地址在MqttOutConfig
@@ -718,7 +729,9 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			String deviceId = ByteUtil.byteArrToHexString(msg.getDevId());
 
 		} else {
-			logger.error("硬件正等待回复指定指令...");
+			long endTime = System.currentTimeMillis();
+			long waitTime= (endTime - startTime)/1000;
+			logger.error("硬件正等待回复指定指令,已等待{}秒……",waitTime);
 		}
 
 		// TODO 这里添加数量判断 linkDeviceCount

@@ -7,19 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSONObject;
 import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
-import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigAllParamNoneException;
-import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigCodeNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceSecretKeyNotCompleteException;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceSecretKeyService;
-import com.bimuo.easy.collection.personposition.v1.service.vo.secretKey.Key1Vo;
-import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
 
 /**
  * 修改设备密钥控制器
@@ -36,7 +30,7 @@ public class DeviceSecretKeyController {
 	private IDeviceSecretKeyService deviceSecretKeyService;
 	
 	/**
-	 * 修改密钥
+	 * 修改密钥1
 	 * 
 	 * @param deviceId     设备编号
 	 * @param oldPassword  旧密钥
@@ -52,10 +46,55 @@ public class DeviceSecretKeyController {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(oldPassword),new DeviceSecretKeyNotCompleteException());
 		AssertUtils.checkArgument(StringUtils.isNotBlank(newPassword),new DeviceSecretKeyNotCompleteException());
 		// 发修改密钥命令给硬件
-		deviceSecretKeyService.updateHardwareSecretKey(deviceId, oldPassword, newPassword);
-		// 不存数据库,硬件自行判断修改正确与否
-		return ResponseEntity.ok("密钥修改成功!");
+		deviceSecretKeyService.updateHardwareSecretKey1(deviceId, oldPassword, newPassword);
+		// 不存数据库,等待硬件自行判断修改正确与否
+		log.info("修改密钥1指令正等待硬件回复...");
+		return ResponseEntity.ok("密钥1修改指令下发成功!");
 	}
 	
-
+	/**
+	 * 修改密钥2
+	 * 
+	 * @param deviceId     设备编号
+	 * @param oldPassword  旧密钥
+	 * @param newPassword  新密钥
+	 * @return
+	 * @throws Exception
+	 */
+	@PutMapping(value = "/{deviceId}/secretKey2")
+	public ResponseEntity<?> updatesecretKey2(
+			@PathVariable("deviceId") String deviceId,
+			@RequestParam(required = false) String oldPassword,
+			@RequestParam(required = false) String newPassword) throws Exception {
+		AssertUtils.checkArgument(StringUtils.isNotBlank(oldPassword),new DeviceSecretKeyNotCompleteException());
+		AssertUtils.checkArgument(StringUtils.isNotBlank(newPassword),new DeviceSecretKeyNotCompleteException());
+		// 发修改密钥命令给硬件
+		deviceSecretKeyService.updateHardwareSecretKey2(deviceId, oldPassword, newPassword);
+		// 不存数据库,等待硬件自行判断修改正确与否
+		log.info("修改密钥2指令正等待硬件回复...");
+		return ResponseEntity.ok("密钥2修改指令下发成功!");
+	}
+	
+	/**
+	 * 修改密钥3
+	 * 
+	 * @param deviceId     设备编号
+	 * @param oldPassword  旧密钥
+	 * @param newPassword  新密钥
+	 * @return
+	 * @throws Exception
+	 */
+	@PutMapping(value = "/{deviceId}/secretKey3")
+	public ResponseEntity<?> updatesecretKey3(
+			@PathVariable("deviceId") String deviceId,
+			@RequestParam(required = false) String oldPassword,
+			@RequestParam(required = false) String newPassword) throws Exception {
+		AssertUtils.checkArgument(StringUtils.isNotBlank(oldPassword),new DeviceSecretKeyNotCompleteException());
+		AssertUtils.checkArgument(StringUtils.isNotBlank(newPassword),new DeviceSecretKeyNotCompleteException());
+		// 发修改密钥命令给硬件
+		deviceSecretKeyService.updateHardwareSecretKey3(deviceId, oldPassword, newPassword);
+		// 不存数据库,等待硬件自行判断修改正确与否
+		log.info("修改密钥3指令正等待硬件回复...");
+		return ResponseEntity.ok("密钥3修改指令下发成功!");
+	}
 }

@@ -432,7 +432,6 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 
 	@Override
 	public NetworkParamsVo updateNetworkParams(String deviceId, byte[] sourceIp, byte[] subnetMask, byte[] gatway, byte[] sourceHardware) {
-		DeviceSettingVo dsetting = new DeviceSettingVo();
 		NetworkParamsVo networkParams = new NetworkParamsVo();
 		// 判断用于查询的编号是否为空
 		Preconditions.checkArgument(StringUtils.isNotBlank(deviceId), new DeviceCodeNoneException());
@@ -440,8 +439,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		// 更新网络参数
 		setNetworkParams(networkParams, sourceIp, subnetMask, gatway, sourceHardware);
 		// 更新原先记录
-		dsetting.setNetworkParams(networkParams);
-		device.setDeviceSetting(dsetting);
+		device.getDeviceSetting().setNetworkParams(networkParams);
 		personPositionDeviceService.modify(device);
 		logger.debug("==========数据库【修改】设备编号【{}】网络参数成功!",device.getDeviceCode());
 		return networkParams;
@@ -449,7 +447,6 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 
 	@Override
 	public Port0Vo updatePort0(String deviceId, byte[] socket0dip, Short DPort, Short SPort, Byte mode, Byte enable) {
-		DeviceSettingVo dsetting = new DeviceSettingVo();
 		Port0Vo port0 = new Port0Vo();
 		// 判断用于查询的编号是否为空
 		Preconditions.checkArgument(StringUtils.isNotBlank(deviceId), new DeviceCodeNoneException());
@@ -457,8 +454,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		// 更新端口0配置
 		setPort0(port0, socket0dip, DPort, SPort, mode, enable);
 		// 更新原先记录
-		dsetting.setPort0(port0);
-		device.setDeviceSetting(dsetting);
+		device.getDeviceSetting().setPort0(port0);
 		personPositionDeviceService.modify(device);
 		logger.debug("==========数据库【修改】设备编号【{}】端口0成功!",device.getDeviceCode());
 		return port0;
@@ -466,7 +462,6 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 
 	@Override
 	public Port1Vo updatePort1(String deviceId, byte[] socket0dip, Short DPort, Short SPort, Byte mode,Byte enable) {
-		DeviceSettingVo dsetting = new DeviceSettingVo();
 		Port1Vo port1 = new Port1Vo();
 		// 判断用于查询的编号是否为空
 		Preconditions.checkArgument(StringUtils.isNotBlank(deviceId), new DeviceCodeNoneException());
@@ -474,8 +469,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		// 更新端口1配置
 		setPort1(port1, socket0dip, DPort, SPort, mode, enable);
 		// 更新原先记录
-		dsetting.setPort1(port1);
-		device.setDeviceSetting(dsetting);
+		device.getDeviceSetting().setPort1(port1);
 		personPositionDeviceService.modify(device);
 		logger.debug("==========数据库【修改】设备编号【{}】端口1成功!",device.getDeviceCode());
 		return port1;
@@ -484,7 +478,6 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 
 //	@Override
 //	public Port2Vo updatePort2(String deviceId, byte[] socket0dip, Short DPort, Short SPort, Byte mode,Byte enable) {
-//		DeviceSettingVo dsetting = new DeviceSettingVo();
 //		Port2Vo port2 = new Port2Vo();
 //		// 判断用于查询的编号是否为空
 //		Preconditions.checkArgument(StringUtils.isNotBlank(deviceId), new DeviceCodeNoneException());
@@ -492,8 +485,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 //		// 更新端口2配置
 //		setPort2(port2, socket0dip, DPort, SPort, mode, enable);
 //		// 更新原先记录
-//		dsetting.setPort2(port2);
-//		device.setDeviceSetting(dsetting);
+//		device.getDeviceSetting().setPort2(port2);
 //		personPositionDeviceService.modify(device);
 //		logger.info("==========数据库【修改】设备编号【{}】端口2成功!",device.getDeviceCode());
 //		return port2;
@@ -501,7 +493,6 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 
 //	@Override
 //	public Port3Vo updatePort3(String deviceId, byte[] socket0dip, Short DPort, Short SPort, Byte mode,Byte enable) {
-//		DeviceSettingVo dsetting = new DeviceSettingVo();
 //		Port3Vo port3 = new Port1Vo();
 //		// 判断用于查询的编号是否为空
 //		Preconditions.checkArgument(StringUtils.isNotBlank(deviceId), new DeviceCodeNoneException());
@@ -509,8 +500,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 //		// 更新端口3配置
 //		setPort3(port3, socket0dip, DPort, SPort, mode, enable);
 //		// 更新原先记录
-//		dsetting.setPort3(port3);
-//		device.setDeviceSetting(dsetting);
+//		device.getDeviceSetting().setPort3(port3);
 //		personPositionDeviceService.modify(device);
 //		logger.info("==========数据库【修改】设备编号【{}】端口3成功!",device.getDeviceCode());
 //		return port3;

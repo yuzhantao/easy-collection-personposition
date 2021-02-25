@@ -13,7 +13,7 @@ import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.CreatedDate;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.bimuo.easy.collection.personposition.v1.service.vo.DeviceConfigReadVo;
+import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
@@ -68,13 +68,6 @@ public class PersonPositionDevice {
 	@CreatedDate
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
-	
-	/**
-	 * 设备配置
-	 */
-	@Type(type = "json")
-	@Column(columnDefinition = "json")
-	private DeviceConfigReadVo deviceConfig;
 	
 	/**
 	 * 设备综合配置
@@ -142,14 +135,6 @@ public class PersonPositionDevice {
 
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
-	}
-
-	public DeviceConfigReadVo getDeviceConfig() {
-		return deviceConfig;
-	}
-
-	public void setDeviceConfig(DeviceConfigReadVo deviceConfig) {
-		this.deviceConfig = deviceConfig;
 	}
 
 	public DeviceSettingVo getDeviceSetting() {
