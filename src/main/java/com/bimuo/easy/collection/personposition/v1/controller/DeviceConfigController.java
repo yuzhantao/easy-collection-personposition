@@ -200,10 +200,10 @@ public class DeviceConfigController {
 	@PutMapping(value = "/{deviceId}/baseConfig")
 	public ResponseEntity<?> updateBaseConfig(
 			@PathVariable("deviceId") String deviceId,
-			@RequestBody String json) throws Exception {
+			@RequestBody DeviceBaseConfigVo baseConfig) throws Exception {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
-		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
-		DeviceBaseConfigVo baseConfig = JSONObject.parseObject(json, DeviceBaseConfigVo.class);
+//		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
+//		DeviceBaseConfigVo baseConfig = JSONObject.parseObject(json, DeviceBaseConfigVo.class);
 		// 发修改网络参数命令给硬件
 		deviceConfigService.updateHardwareBaseConfig(deviceId, baseConfig.getDeviceId(), baseConfig.getCain1(), baseConfig.getCain2(), 
 				baseConfig.getAirBaudrate(), baseConfig.getBaudrate(), baseConfig.getBuzzType(), baseConfig.getIoInput(),
