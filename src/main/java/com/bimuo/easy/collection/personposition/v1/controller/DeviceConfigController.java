@@ -23,6 +23,7 @@ import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceSettingService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
+import com.bimuo.easy.collection.personposition.v1.service.util.CommandStateMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
@@ -315,4 +316,22 @@ public class DeviceConfigController {
 //		// 复位重连后,通过轮询配置自动更新数据库
 //		return ResponseEntity.ok("修改端口3指令下发成功!");
 //	}
+	
+	/**
+	 * 复位设备
+	 * @param deviceId 设备编号
+	 * @return 设备配置实体
+	 * @throws Exception
+	 */
+	@GetMapping("/{deviceId}/reset")
+	public ResponseEntity<?> resetDevice(@PathVariable String deviceId) throws Exception{
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
+		this.deviceSettingService.resetHardware(deviceId);
+//		if(CommandStateMapping.getInstance().getUpdateState(deviceId).equals("Success")) {
+			return ResponseEntity.ok("复位指令下发成功!");
+//		} else {
+//			return ResponseEntity.ok("复位指令下发失败!");
+//		}
+	}
 }

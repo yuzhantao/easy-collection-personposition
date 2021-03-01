@@ -490,13 +490,25 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			}	
 		}
 		if (msg.getCommand() == 0x4D) { // 0x4D协议用来更改密钥1
-			
+			if(ByteUtil.byteArrToHexString(data).equals("4F4B")) {
+				logger.info("设备编号【{}】更改密钥1成功!", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+			} else {
+				logger.error("设备编号【{}】更改密钥1失败! Data段是【{}】", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase(), ByteUtil.byteArrToHexString(data));
+			}
 		}
 		if (msg.getCommand() == 0x4E) { // 0x4E协议用来更改密钥1
-			
+			if(ByteUtil.byteArrToHexString(data).equals("4F4B")) {
+				logger.info("设备编号【{}】更改密钥2成功!", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+			} else {
+				logger.error("设备编号【{}】更改密钥2失败! Data段是【{}】", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase(), ByteUtil.byteArrToHexString(data));
+			}
 		}
 		if (msg.getCommand() == 0x4F) { // 0x4F协议用来更改密钥1
-	
+			if(ByteUtil.byteArrToHexString(data).equals("4F4B")) {
+				logger.info("设备编号【{}】更改密钥3成功!", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
+			} else {
+				logger.error("设备编号【{}】更改密钥3失败! Data段是【{}】", ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase(), ByteUtil.byteArrToHexString(data));
+			}
 		}
 		if (msg.getCommand() == 0x44) { // 0x44协议用来读取设备配置
 			logger.debug("==========设备回复指令的协议是:" + msg.getCommand() + " " + "Data段是:" + ByteUtil.byteArrToHexString(data));

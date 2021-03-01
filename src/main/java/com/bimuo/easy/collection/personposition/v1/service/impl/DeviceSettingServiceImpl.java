@@ -19,6 +19,7 @@ import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDev
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceSettingService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CommandStateMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port0Vo;
@@ -475,7 +476,6 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		return port1;
 	}
 
-
 //	@Override
 //	public Port2Vo updatePort2(String deviceId, byte[] socket0dip, Short DPort, Short SPort, Byte mode,Byte enable) {
 //		Port2Vo port2 = new Port2Vo();
@@ -505,5 +505,36 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 //		logger.info("==========数据库【修改】设备编号【{}】端口3成功!",device.getDeviceCode());
 //		return port3;
 //	}
-
+	
+	@Override
+	public void resetHardware(String deviceId) {
+		byte[] command = {0x02,0x03,0x04,0x05,0x00,0x13,0x00,(byte) 0x88,0x61,0x00,0x4D,0x43,0x55,0x52,0x45,0x53,0x45,0x54,0x72};
+		// 根据code-channel映射表取设备对应管道
+		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
+		if (channel == null) {
+			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
+			CommandStateMapping.getInstance().addStateMapping(deviceId, "NoChannel");
+		} else if (!channel.isActive() || !channel.isWritable()) {
+			logger.info("设备编号【{}】的管道不可用", deviceId);
+			CommandStateMapping.getInstance().addStateMapping(deviceId, "ChannelDisable");
+		} else {
+			logger.info("设备编号【{}】对应的管道是{}", deviceId, channel);
+			ByteBuf bs = Unpooled.copiedBuffer(command);
+			ChannelFuture cf = channel.writeAndFlush(bs);
+			// 回调函数监听是否发送成功
+			cf.addListener(new ChannelFutureListener() {
+				@Override
+				public void operationComplete(ChannelFuture future) throws Exception {
+					if (future.isSuccess()) {
+						// TODO 存在异步问题 还未执行监听时Controller已继续执行 则不会返回任何东西
+						logger.info("发送复位命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Success");
+					} else {
+						logger.error("发送复位命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Fail");
+					}
+				}
+			});
+		}
+	}
 }

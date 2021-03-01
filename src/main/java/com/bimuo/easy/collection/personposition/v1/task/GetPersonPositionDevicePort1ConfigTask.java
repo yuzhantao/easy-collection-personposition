@@ -35,7 +35,7 @@ public class GetPersonPositionDevicePort1ConfigTask {
 	/**
 	 * 定时给硬件发送指令,轮询间隔10s
 	 */
-	@Scheduled(cron = "0/10 * * * * ?")
+	@Scheduled(cron = "0/100 * * * * ?")
     public void runfirst() {
 		ByteBuf bs = Unpooled.copiedBuffer(port1ConfigDatas);
 		ChannelGroupFuture future = CollectionServer.channels.writeAndFlush(bs); // channels向所有设备发送指令

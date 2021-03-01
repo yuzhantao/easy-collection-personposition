@@ -1,12 +1,8 @@
 package com.bimuo.easy.collection.personposition.v1.service;
 
-import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
-import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port0Vo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port1Vo;
-import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port2Vo;
-import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port3Vo;
 
 /**
  * 设备配置父类服务
@@ -15,6 +11,13 @@ import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port3Vo;
  *
  */
 public interface IDeviceSettingService {
+	
+	/**
+	 * 复位设备
+	 * @param deviceId 设备编号
+	 */
+	public void resetHardware(String deviceId);
+	
 	
 	/**
 	 * 修改硬件网络参数
