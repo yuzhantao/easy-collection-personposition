@@ -223,10 +223,10 @@ public class DeviceConfigController {
 	@PutMapping(value = "/{deviceId}/networkParams")
 	public ResponseEntity<?> updateNetworkParams(
 			@PathVariable("deviceId") String deviceId,
-			@RequestBody String json) throws Exception {
+			@RequestBody NetworkParamsVo networkParams) throws Exception {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
-		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
-		NetworkParamsVo networkParams = JSONObject.parseObject(json, NetworkParamsVo.class);
+//		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
+//		NetworkParamsVo networkParams = JSONObject.parseObject(json, NetworkParamsVo.class);
 		// 发修改网络参数命令给硬件
 		deviceSettingService.updateHardwareNetworkParams(deviceId, networkParams.getSourceIp(), networkParams.getSubnetMask(), networkParams.getGatway(), networkParams.getSourceHardware());
 		// 复位重连后,通过轮询配置自动更新数据库
