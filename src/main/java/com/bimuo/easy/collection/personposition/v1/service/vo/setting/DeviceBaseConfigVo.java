@@ -3,7 +3,7 @@ package com.bimuo.easy.collection.personposition.v1.service.vo.setting;
 import java.io.Serializable;
 
 /**
- * 读取设备配置实体类
+ * 设备基本配置实体类
  * 
  * @author Pingfan
  *

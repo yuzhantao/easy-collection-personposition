@@ -1,5 +1,6 @@
 package com.bimuo.easy.collection.personposition.v1.service.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
 import com.bimuo.easy.collection.personposition.v1.exception.TagAddIdNoneException;
@@ -140,5 +142,11 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
 		return tagExcelInfo;
 	}
 
-	
+	@Transactional
+	@Override
+	public void clearTable() {
+		this.tagHistoryRepository.clearTableMoreThanTwoDays();
+		log.info("只留两天内实时数据成功!");
+	}
+
 }

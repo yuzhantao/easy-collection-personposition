@@ -38,8 +38,6 @@ public class MqttController {
      */
     @PostMapping("/send")
     public void send(String topic, String data) {
-    	topic = "personposition";
-    	data = "hello";
         this.logger.info("开始发送mqtt消息,主题：{},消息：{}", topic, data);
         if (StringUtils.isNotBlank(topic)) {
             this.mqttMessageSender.sendToMqtt(topic, data);

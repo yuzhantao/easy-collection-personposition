@@ -68,4 +68,9 @@ public interface ITagHistoryService {
 	 * @return Excel实体集合
 	 */
 	List<TagHistoryToExcel> toExcel(String[] deviceCode,Date startTime,Date endTime);
+	
+	/**
+	 * 清除表中两天之外的数据
+	 */
+	void clearTable();
 }
