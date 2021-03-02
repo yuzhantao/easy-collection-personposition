@@ -244,10 +244,10 @@ public class DeviceConfigController {
 	@PutMapping(value = "/{deviceId}/port0")
 	public ResponseEntity<?> updatePort0Config(
 			@PathVariable("deviceId") String deviceId,
-			@RequestBody String json) throws Exception {
+			@RequestBody Port0Vo port0) throws Exception {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
-		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
-		Port0Vo port0 = JSONObject.parseObject(json, Port0Vo.class);
+//		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
+//		Port0Vo port0 = JSONObject.parseObject(json, Port0Vo.class);
 		// 发修改端口1命令给硬件
 		deviceSettingService.updateHardwarePortConfig(deviceId, port0.getPortType(), port0.getSocket0DIP(), port0.getDPort(), port0.getSPort(), port0.getMode(), port0.getEnable());
 		// 复位重连后,通过轮询配置自动更新数据库
@@ -265,10 +265,10 @@ public class DeviceConfigController {
 	@PutMapping(value = "/{deviceId}/port1")
 	public ResponseEntity<?> updatePort1Config(
 			@PathVariable("deviceId") String deviceId,
-			@RequestBody String json) throws Exception {
+			@RequestBody Port1Vo port1) throws Exception {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
-		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
-		Port1Vo port1 = JSONObject.parseObject(json, Port1Vo.class);
+//		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
+//		Port1Vo port1 = JSONObject.parseObject(json, Port1Vo.class);
 		// 发修改端口1命令给硬件
 		deviceSettingService.updateHardwarePortConfig(deviceId, port1.getPortType(), port1.getSocket0DIP(), port1.getDPort(), port1.getSPort(), port1.getMode(), port1.getEnable());
 		// 复位重连后,通过轮询配置自动更新数据库
