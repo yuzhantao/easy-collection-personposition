@@ -24,10 +24,10 @@ public class LicenseCheckHandler extends AbstractRemoteAddressFilter<InetSocketA
 	@Override
 	protected boolean accept(ChannelHandlerContext ctx, InetSocketAddress remoteAddress) throws Exception {
 //		String ip = remoteAddress.getAddress().getHostAddress();
-//		System.out.println("连接�?:" + this.server.getConnectNum().get());
+//		System.out.println("连接数:" + this.server.getConnectNum().get());
 
-		if (this.server.getConnectNum().get() < 3) {
-			logger.info("*****************当前连接�?:" + this.server.getConnectNum().get()+"   无需验证a");
+		if (this.server.getConnectNum().get() < 5) {
+			logger.info("*****************当前连接数:" + this.server.getConnectNum().get()+"   无需验证a");
 			return true;
 		}
 

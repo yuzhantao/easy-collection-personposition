@@ -7,30 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSONObject;
 import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeNoneException;
-import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigAllParamNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceConfigCodeNoneException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceSettingService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
-import com.bimuo.easy.collection.personposition.v1.service.util.CommandStateMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
-import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port0Vo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port1Vo;
-import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port2Vo;
-import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port3Vo;
 
 /**
  * 读取修改设备配置控制器
@@ -60,7 +52,7 @@ public class DeviceConfigController {
 	 * @return 设备配置实体
 	 * @throws Exception
 	 */
-	@GetMapping("/{deviceId}/config")
+	@GetMapping("/{deviceId}/baseConfig")
 	public ResponseEntity<?> queryDeviceConfig(@PathVariable String deviceId) throws Exception{
 		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
 		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
@@ -202,7 +194,9 @@ public class DeviceConfigController {
 			@PathVariable("deviceId") String deviceId,
 			@RequestBody DeviceBaseConfigVo baseConfig) throws Exception {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
-//		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
+		//		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
 //		DeviceBaseConfigVo baseConfig = JSONObject.parseObject(json, DeviceBaseConfigVo.class);
 		// 发修改网络参数命令给硬件
 		deviceConfigService.updateHardwareBaseConfig(deviceId, baseConfig.getDeviceId(), baseConfig.getCain1(), baseConfig.getCain2(), 
@@ -225,6 +219,8 @@ public class DeviceConfigController {
 			@PathVariable("deviceId") String deviceId,
 			@RequestBody NetworkParamsVo networkParams) throws Exception {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
 //		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
 //		NetworkParamsVo networkParams = JSONObject.parseObject(json, NetworkParamsVo.class);
 		// 发修改网络参数命令给硬件
@@ -246,6 +242,8 @@ public class DeviceConfigController {
 			@PathVariable("deviceId") String deviceId,
 			@RequestBody Port0Vo port0) throws Exception {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
 //		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
 //		Port0Vo port0 = JSONObject.parseObject(json, Port0Vo.class);
 		// 发修改端口1命令给硬件
@@ -267,6 +265,8 @@ public class DeviceConfigController {
 			@PathVariable("deviceId") String deviceId,
 			@RequestBody Port1Vo port1) throws Exception {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
+		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
 //		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
 //		Port1Vo port1 = JSONObject.parseObject(json, Port1Vo.class);
 		// 发修改端口1命令给硬件
@@ -287,6 +287,8 @@ public class DeviceConfigController {
 //	public ResponseEntity<?> updatePort2Config(
 //			@PathVariable("deviceId") String deviceId,
 //			@RequestBody String json) throws Exception {
+//		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+//		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
 //		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
 //		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
 //		Port2Vo port2 = JSONObject.parseObject(json, Port2Vo.class);
@@ -308,6 +310,8 @@ public class DeviceConfigController {
 //	public ResponseEntity<?> updatePort3Config(
 //			@PathVariable("deviceId") String deviceId,
 //			@RequestBody String json) throws Exception {
+//		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
+//		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
 //		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
 //		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
 //		Port3Vo port3 = JSONObject.parseObject(json, Port3Vo.class);

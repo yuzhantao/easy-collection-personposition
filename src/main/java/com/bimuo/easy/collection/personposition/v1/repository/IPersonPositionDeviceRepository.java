@@ -19,9 +19,17 @@ public interface IPersonPositionDeviceRepository extends JpaRepository<PersonPos
 	PersonPositionDevice getOneByDeviceCode(String deviceCode);
 	
 	/**
-	 * 根据ip地址查询一个设备
+	 * 根据ip地址查询主动断开的设备集合
 	 * @param ip ip地址
-	 * @return 查询到的设备实体
+	 * @return 设备实体集合
+	 */
+	List<PersonPositionDevice> getOneByIp(String ip);
+	
+	/**
+	 * 根据ip地址和有效性查询设备集合
+	 * @param ip ip地址
+	 * @param isEffective 记录是否有效
+	 * @return 设备实体集合
 	 */
 	List<PersonPositionDevice> getOneByIpAndIsEffective(String ip,boolean isEffective);
 	

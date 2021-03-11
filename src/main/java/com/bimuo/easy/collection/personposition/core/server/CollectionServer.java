@@ -89,7 +89,7 @@ public class CollectionServer extends AbstractExecutionThreadService {
 			serverBootstrap.childHandler(new NettyChannelHandler(factory, writeTimetou, readTime));
 			serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
 			ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
-			logger.info("{}(port={}) 鏈嶅姟宸插紑锟�?", this.getServerName(), this.getServerPort());
+			logger.info("{}(port={}) 程序名(端口)", this.getServerName(), this.getServerPort());
 			channelFuture.channel().closeFuture().sync();
 		} finally {
 			this.destory();

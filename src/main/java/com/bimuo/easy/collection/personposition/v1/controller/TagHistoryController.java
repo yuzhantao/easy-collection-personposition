@@ -111,7 +111,7 @@ public class TagHistoryController {
 			@RequestParam(required=false) String startTime,
 			@RequestParam(required=false) String endTime,
 			HttpServletResponse response) throws Exception {
-		log.info("Excel 导出开始......");
+		log.info("Excel 开始导出【历史标签】......");
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date realStartTime = null;
 		Date realEndTime = null;
@@ -125,15 +125,15 @@ public class TagHistoryController {
 		List<TagHistoryToExcel> list = tagHistoryService.toExcel(deviceCode, realStartTime,realEndTime);
 		try {
 			// 设置响应输出的头类型及下载文件的默认名称
-			String fileName = new String("标签历史信息表.xls".getBytes("utf-8"), "ISO-8859-1");
+			String fileName = new String("历史数据.xls".getBytes("utf-8"), "ISO-8859-1");
 			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 			response.setContentType("application/vnd.ms-excel;charset=gb2312");
 			// 导出
 			Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams(), TagHistoryToExcel.class, list);
 			workbook.write(response.getOutputStream());
-			log.info("Excel 导出成功!");
+			log.info("Excel 【历史标签】导出成功!");
 		} catch (IOException e) {
-			log.info("Excel 导出异常：{}", e.getMessage());
+			log.error("Excel 【历史标签】导出异常：{}", e.getMessage());
 		}
 	}
 	

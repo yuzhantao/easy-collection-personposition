@@ -48,6 +48,7 @@ import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.res
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag4Vo;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag5Vo;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.response.vo.Tag6Vo;
+import com.bimuo.easy.collection.personposition.v1.exception.DeviceIpNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.TagReadNoDeviceException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.model.TagHistory;
@@ -177,24 +178,25 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 
 		MDC.put("ip", ip);
 		// 离线时根据ip查询离线设备,再将设备状态改为offline,同时修改更新时间
-		List<PersonPositionDevice> devices = personPositionDeviceService.getOneByIp(ip);
-		if(devices.isEmpty()) {
-			logger.error("断开时根据ip查询到多条记录,更新数据库失败!");
-		} else {
-			for (int i = 0; i < devices.size(); i++) {
-				devices.get(i).setDeviceState("offline");
-				devices.get(i).setUpdateTime(new Date());
-				personPositionDeviceService.modify(devices.get(i));
-				logger.error("人员定位已断开{},状态为{}",ip,devices.get(i).getDeviceState());
-				// 离线时删除code-channel映射,以备修改配置使用
-				CodeMapping.getInstance().removeChannelMapping(devices.get(i).getDeviceCode());  // 避免断开连接时netty自动将管道清除
-				if(CodeMapping.getInstance().channelMappingContainsKey(devices.get(i).getDeviceCode()) == false) {
-					logger.debug("复位后设备【{}】映射删除成功",devices.get(i).getDeviceCode());
-				} else {
-					logger.error("复位后设备【{}】映射删除失败或并无该记录",devices.get(i).getDeviceCode());
-				}
-			}
-		}
+		List<PersonPositionDevice> devices = personPositionDeviceService.getOfflineDevicesByIp(ip);
+//		if(devices.isEmpty()) {
+//			logger.error("断开时根据ip查询到多条记录,更新数据库失败!");
+//		} else {
+//			for (int i = 0; i < devices.size(); i++) {
+//				devices.get(i).setDeviceState("offline");
+//				devices.get(i).setUpdateTime(new Date());
+//				personPositionDeviceService.modify(devices.get(i));
+//				logger.error("人员定位【{}】已断开,ip为{},状态为{}",devices.get(i).getDeviceCode(), ip, devices.get(i).getDeviceState());
+//				// 离线时删除code-channel映射,以备修改配置使用
+//				CodeMapping.getInstance().removeChannelMapping(devices.get(i).getDeviceCode());  // 避免断开连接时netty自动将管道清除
+//				if(CodeMapping.getInstance().channelMappingContainsKey(devices.get(i).getDeviceCode()) == false) {
+//					logger.debug("复位后设备【{}】映射删除成功",devices.get(i).getDeviceCode());
+//				} else {
+//					logger.error("复位后设备【{}】映射删除失败或并无该记录",devices.get(i).getDeviceCode());
+//				}
+//			}
+//		}
+		AssertUtils.checkArgument(devices.isEmpty() == false, new DeviceIpNoneException());
 		MDC.remove("ip");
 
 //		NetMapping.getInstance().removeChannel(ctx.channel());
@@ -226,7 +228,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			// 新添加code-channel映射
 			CodeMapping.getInstance().addChannel(ctx.channel());
 			CodeMapping.getInstance().addChannelMapping(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),ctx.channel());
-			logger.debug("新添加code-channel映射,设备编号={},管道={}",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),ctx.channel());
+			logger.info("新添加code-channel映射,设备编号={},管道={}",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),ctx.channel());
 			// 更新DeviceConfigResponse映射表
 //			if(StringUtils.isNotBlank(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase())) {
 //				DeviceConfigResponseMapping.getInstance().addResponseMapping(ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(), "updatedAndReset");
@@ -248,7 +250,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				// 使用map记录修改配置后的编号,以备修改配置的Controller读取设备回复的消息
 //				DeviceConfigResponseMapping.getInstance().addResponseMapping(ByteUtil.byteArrToHexString(deviceIdArray), "updatedNoReset");
 //				logger.info("新添加DeviceConfigResponse表的编号{},状态{}",ByteUtil.byteArrToHexString(deviceIdArray),DeviceConfigResponseMapping.getInstance().getUpdateConfigState(ByteUtil.byteArrToHexString(deviceIdArray)));
-				logger.info("设备编号【{}】修改硬件配置成功!",ByteUtil.byteArrToHexString(deviceIdArray));
+				logger.info("硬件回复OK-【{}】人员定位【修改基础配置】成功!",ByteUtil.byteArrToHexString(deviceIdArray));
 				// 设置原记录无效
 				PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
 				if(dev != null && dev.isEffective()) {
@@ -259,28 +261,28 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				}
 				
 //				// TODO 修改后复位逻辑待修改
-//				// 硬件修改成功,发送复位指令
-//				byte[] command = {0x02,0x03,0x04,0x05,0x00,0x13,0x00,(byte) 0x88,0x61,0x00,0x4D,0x43,0x55,0x52,0x45,0x53,0x45,0x54,0x72};
-//				Channel channel = CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(deviceIdArray));
-//				if(channel == null) {
-//					logger.info("code-channel表中不存在设备编号【{}】的管道",ByteUtil.byteArrToHexString(deviceIdArray));
-//				} else {
-//					logger.info("设备编号【{}】对应的管道是{}",ByteUtil.byteArrToHexString(deviceIdArray),channel);
-//					ByteBuf bs = Unpooled.copiedBuffer(command);
-//					ChannelFuture cf = channel.writeAndFlush(bs);
-//					// 回调函数监听是否发送成功
-//					cf.addListener(new ChannelFutureListener() {
-//						@NotProguard
-//						@Override
-//						public void operationComplete(ChannelFuture future) throws Exception {
-//							if (future.isSuccess()) {
-//								logger.info("发送复位命令成功,下发命令={}",ByteUtil.byteArrToHexString(command, true));
-//							} else {
-//								logger.error("发送复位命令失败,下发命令={}",ByteUtil.byteArrToHexString(command, true));
-//							}
-//						}
-//					});
-//				}
+				// 硬件修改成功,发送复位指令
+				byte[] command = {0x02,0x03,0x04,0x05,0x00,0x13,0x00,(byte) 0x88,0x61,0x00,0x4D,0x43,0x55,0x52,0x45,0x53,0x45,0x54,0x72};
+				Channel channel = CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(deviceIdArray));
+				if(channel == null) {
+					logger.error("code-channel表中不存在设备编号【{}】的管道",ByteUtil.byteArrToHexString(deviceIdArray));
+				} else {
+					logger.debug("设备编号【{}】对应的管道是{}",ByteUtil.byteArrToHexString(deviceIdArray),channel);
+					ByteBuf bs = Unpooled.copiedBuffer(command);
+					ChannelFuture cf = channel.writeAndFlush(bs);
+					// 回调函数监听是否发送成功
+					cf.addListener(new ChannelFutureListener() {
+						@NotProguard
+						@Override
+						public void operationComplete(ChannelFuture future) throws Exception {
+							if (future.isSuccess()) {
+								logger.info("发送复位命令成功,下发命令={}",ByteUtil.byteArrToHexString(command, true));
+							} else {
+								logger.error("发送复位命令失败,下发命令={}",ByteUtil.byteArrToHexString(command, true));
+							}
+						}
+					});
+				}
 			} else {
 				logger.error("设备编号【{}】修改硬件配置失败! Data段是【{}】",ByteUtil.byteArrToHexString(deviceIdArray),ByteUtil.byteArrToHexString(data));
 			}
@@ -289,7 +291,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		if (msg.getCommand() == 0x46) { // 0x46协议用来修改网络参数/端口配置
 			// 设置成功则设备回复:Data[] = 'OK(4F4B)',失败没反应,CheckSum为任意值
 			if(ByteUtil.byteArrToHexString(data).equals("4F4B")) {
-			logger.info("设备编号【{}】修改硬件网络参数/端口成功!",ByteUtil.byteArrToHexString(deviceIdArray));
+			logger.info("硬件回复OK-【{}】修改硬件网络参数/端口成功!",ByteUtil.byteArrToHexString(deviceIdArray));
 			// 设置原记录无效
 			PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase());
 			if(dev != null && dev.isEffective()) {
@@ -301,27 +303,27 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 
 			// TODO 修改后复位逻辑待修改
 			// 硬件修改成功,发送复位指令
-//			byte[] command = {0x02,0x03,0x04,0x05,0x00,0x13,0x00,(byte) 0x88,0x61,0x00,0x4D,0x43,0x55,0x52,0x45,0x53,0x45,0x54,0x72};
-//			Channel channel = CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(deviceIdArray));
-//			if(channel == null) {
-//				logger.info("code-channel表中不存在设备编号【{}】的管道",ByteUtil.byteArrToHexString(deviceIdArray));
-//			} else {
-//				logger.info("设备编号【{}】对应的管道是{}",ByteUtil.byteArrToHexString(deviceIdArray),channel);
-//				ByteBuf bs = Unpooled.copiedBuffer(command);
-//				ChannelFuture cf = channel.writeAndFlush(bs);
-//					// 回调函数监听是否发送成功
-//					cf.addListener(new ChannelFutureListener() {
-//						@NotProguard
-//						@Override
-//						public void operationComplete(ChannelFuture future) throws Exception {
-//							if (future.isSuccess()) {
-//								logger.info("发送复位命令成功,下发命令={}",ByteUtil.byteArrToHexString(command, true));
-//							} else {
-//								logger.error("发送复位命令失败,下发命令={}",ByteUtil.byteArrToHexString(command, true));
-//							}
-//						}
-//					});
-//				}
+			byte[] command = {0x02,0x03,0x04,0x05,0x00,0x13,0x00,(byte) 0x88,0x61,0x00,0x4D,0x43,0x55,0x52,0x45,0x53,0x45,0x54,0x72};
+			Channel channel = CodeMapping.getInstance().getChannel(ByteUtil.byteArrToHexString(deviceIdArray));
+			if(channel == null) {
+				logger.info("code-channel表中不存在设备编号【{}】的管道",ByteUtil.byteArrToHexString(deviceIdArray));
+			} else {
+				logger.info("设备编号【{}】对应的管道是{}",ByteUtil.byteArrToHexString(deviceIdArray),channel);
+				ByteBuf bs = Unpooled.copiedBuffer(command);
+				ChannelFuture cf = channel.writeAndFlush(bs);
+					// 回调函数监听是否发送成功
+					cf.addListener(new ChannelFutureListener() {
+						@NotProguard
+						@Override
+						public void operationComplete(ChannelFuture future) throws Exception {
+							if (future.isSuccess()) {
+								logger.info("发送复位命令成功,下发命令={}",ByteUtil.byteArrToHexString(command, true));
+							} else {
+								logger.error("发送复位命令失败,下发命令={}",ByteUtil.byteArrToHexString(command, true));
+							}
+						}
+					});
+				}
 			} else {
 				logger.error("设备编号【{}】修改网络参数/端口失败! Data段是【{}】",ByteUtil.byteArrToHexString(deviceIdArray),ByteUtil.byteArrToHexString(data));
 			}
@@ -337,6 +339,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				dev.setDeviceState("online");
 				dev.setIp(ip);
 				dev.setUpdateTime(new Date());
+				dev.setDeviceType("人员定位");
 				dev.setEffective(true);
 				personPositionDeviceService.modify(dev);
 				logger.debug("==========数据库设备信息更新成功!");
@@ -370,9 +373,13 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 						ByteUtil.byteArrToHexString (deviceIdArray).toUpperCase(), 
 						sourceIpArr, subnetMaskArr, gatwayArr, sourceHardwareArr);
 				// 更新总配置来更新数据库网络参数
-				DeviceSettingVo dsetting = device.getDeviceSetting();
-				dsetting.setNetworkParams(networkParams);
-				device.setDeviceSetting(dsetting);
+				if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+					DeviceSettingVo dsetting = new DeviceSettingVo();
+					dsetting.setNetworkParams(networkParams);
+					device.setDeviceSetting(dsetting);
+				} else {
+					device.getDeviceSetting().setNetworkParams(networkParams);
+				}
 				personPositionDeviceService.modify(device);
 			} else if(data[0] == 0x42) { // INS二级指令为B(42)表示端口0
 				// 解析设备回复的端口0配置
@@ -387,9 +394,13 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 						socket0DIPArr, ByteUtil.byteArrToShort(DPortArr), 
 						ByteUtil.byteArrToShort(SPortArr),data[9],data[10]);
 				// 更新总配置来更新数据库端口0
-				DeviceSettingVo dsetting = device.getDeviceSetting();
-				dsetting.setPort0(port0);
-				device.setDeviceSetting(dsetting);
+				if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+					DeviceSettingVo dsetting = new DeviceSettingVo();
+					dsetting.setPort0(port0);
+					device.setDeviceSetting(dsetting);
+				} else {
+					device.getDeviceSetting().setPort0(port0);
+				}
 				personPositionDeviceService.modify(device);
 			} else if(data[0] == 0x43) { // INS二级指令为C(43)表示端口1
 				// 解析设备回复的端口1配置
@@ -404,9 +415,13 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 						socket0DIPArr, ByteUtil.byteArrToShort(DPortArr), 
 						ByteUtil.byteArrToShort(SPortArr),data[9],data[10]);
 				// 更新总配置来更新数据库端口1
-				DeviceSettingVo dsetting = device.getDeviceSetting();
-				dsetting.setPort1(port1);
-				device.setDeviceSetting(dsetting);
+				if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+					DeviceSettingVo dsetting = new DeviceSettingVo();
+					dsetting.setPort1(port1);
+					device.setDeviceSetting(dsetting);
+				} else {
+					device.getDeviceSetting().setPort1(port1);
+				}
 				personPositionDeviceService.modify(device);
 			} else if(data[0] == 0x44) { // INS二级指令为D(44)表示端口2
 //				// 解析设备回复的端口2配置
@@ -421,9 +436,13 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 //						socket0DIPArr, ByteUtil.byteArrToShort(DPortArr), 
 //						ByteUtil.byteArrToShort(SPortArr),data[9],data[10]);
 //				// 更新总配置来更新数据库端口2
-//				DeviceSettingVo dsetting = device.getDeviceSetting();
-//				dsetting.setPort2(port2);
-//				device.setDeviceSetting(dsetting);
+//				if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+//					DeviceSettingVo dsetting = new DeviceSettingVo();
+//					dsetting.setPort2(port2);
+//					device.setDeviceSetting(dsetting);
+//				} else {
+//					device.getDeviceSetting().setPort2(port2);
+//				}
 //				personPositionDeviceService.modify(device);
 			} else if(data[0] == 0x45) { // INS二级指令为E(45)表示端口3
 //				// 解析设备回复的端口3配置
@@ -438,9 +457,13 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 //						socket0DIPArr, ByteUtil.byteArrToShort(DPortArr), 
 //						ByteUtil.byteArrToShort(SPortArr),data[9],data[10]);
 //				// 更新总配置来更新数据库端口3
-//				DeviceSettingVo dsetting = device.getDeviceSetting();
-//				dsetting.setPort3(port3);
-//				device.setDeviceSetting(dsetting);
+//				if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+//					DeviceSettingVo dsetting = new DeviceSettingVo();
+//					dsetting.setPort3(port3);
+//					device.setDeviceSetting(dsetting);
+//				} else {
+//					device.getDeviceSetting().setPort3(port3);
+//				}
 //				personPositionDeviceService.modify(device);
 			} else {
 				logger.error("======未识别设备回复的网络配置信息,协议为47");
@@ -477,6 +500,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				dev.setDeviceState("online");
 				dev.setIp(ip);
 				dev.setUpdateTime(new Date());
+				dev.setDeviceType("人员定位");
 				dev.setEffective(true);
 				personPositionDeviceService.modify(dev);
 				logger.debug("==========数据库设备信息更新成功!");
@@ -508,6 +532,16 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			dsetting.setBaseConfig(dconfig);
 			device.setDeviceSetting(dsetting);
 			personPositionDeviceService.modify(device);
+			
+			// 发送配置到mqtt(修改完配置后刷新页面使用)
+			String topic = "personpositon/"+ ByteUtil.byteArrToHexString (deviceIdArray).toUpperCase() + "/config";
+			String mqttData = JSONArray.toJSON(dconfig).toString();
+			if(StringUtils.isNotBlank(topic)) {
+				mqttMessageSenderService.sendToMqtt(topic, mqttData);
+				logger.debug("发送mqtt消息完成,主题:{},消息:{}", topic, mqttData);
+			} else {
+				logger.error("发送mqtt消息失败,主题:{},消息:{}", topic, mqttData);
+			}
 			
 			// 3.将配置类放入内存
 			deviceConfigService.addMemory(msg, dconfig);
@@ -694,7 +728,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		} else {
 			long endTime = System.currentTimeMillis();
 			long waitTime= (endTime - startTime)/1000;
-			logger.error("硬件正等待回复指定指令,已等待{}秒……",waitTime);
+			logger.error("【{}】正等待回复指定指令,已等待{}秒……",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),waitTime);
 		}
 		// TODO 这里添加数量判断 linkDeviceCount
 		if (this.deviceIndex > 5 && PersonPositionResponseHandleContext.linkDeviceCount > 5) {

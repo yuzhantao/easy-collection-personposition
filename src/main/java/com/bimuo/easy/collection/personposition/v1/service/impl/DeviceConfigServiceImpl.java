@@ -133,7 +133,13 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			setDeviceProperty(config, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType, ioInput, critical,
 					filterTagTime, sendInterval, tagType, crcEn);
 			// 更新原先记录
-			oldDevice.getDeviceSetting().setBaseConfig(config);
+			if(oldDevice.getDeviceSetting() == null) { // 重连或修改编号的新设备
+				DeviceSettingVo dsetting = new DeviceSettingVo();
+				dsetting.setBaseConfig(config);
+				oldDevice.setDeviceSetting(dsetting);
+			} else {
+				oldDevice.getDeviceSetting().setBaseConfig(config);
+			}
 			personPositionDeviceService.modify(oldDevice);
 			if (oldDevice.getDeviceCode().equals(oldDevice.getDeviceSetting().getBaseConfig().getDeviceId())) {
 				logger.debug("==========数据库【修改】设备编号【{}】配置信息成功!", oldDevice.getDeviceCode());
@@ -155,7 +161,13 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 			newDevice.setDeviceState(oldDevice.getDeviceState());
 			setDeviceProperty(config, deviceId, cain1, cain2, airBaudrate, baudrate, buzzType, ioInput, critical,
 					filterTagTime, sendInterval, tagType, crcEn);
-			newDevice.getDeviceSetting().setBaseConfig(config);
+			if(newDevice.getDeviceSetting() == null) { // 重连或修改编号的新设备
+				DeviceSettingVo dsetting = new DeviceSettingVo();
+				dsetting.setBaseConfig(config);
+				newDevice.setDeviceSetting(dsetting);
+			} else {
+				newDevice.getDeviceSetting().setBaseConfig(config);
+			}
 			newDevice.setEffective(true);
 			// 添加新设备的记录
 			personPositionDeviceService.insert(newDevice);
@@ -225,25 +237,24 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 				dataArr);
 //		System.arraycopy(ByteUtil.hexStringToBytes(oldDeviceId), 0, command, 6, 2); // deviceId 2字节
 //		System.arraycopy(dataArr, 0, command, 10, 14);
-		logger.info("向硬件发送的修改配置指令是{}", ByteUtil.byteArrToHexString(command, true));
-
+		logger.debug("向硬件发送的修改配置指令是{}", ByteUtil.byteArrToHexString(command, true));
+		logger.info("正在向【{}】下发【修改基础配置】指令……", oldDeviceId);
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(oldDeviceId);
 		if (channel == null) {
 			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", oldDeviceId);
 		} else if (!channel.isActive() || !channel.isWritable()) {
-			logger.info("设备编号【{}】的管道不可用", oldDeviceId);
+			logger.error("设备编号【{}】的管道不可用", oldDeviceId);
 		} else {
-			logger.info("设备编号【{}】对应的管道是{}", oldDeviceId, channel);
+			logger.debug("设备编号【{}】对应的管道是{}", oldDeviceId, channel);
 			ByteBuf bs = Unpooled.copiedBuffer(command);
 			ChannelFuture cf = channel.writeAndFlush(bs);
 			// 回调函数监听是否发送成功
 			cf.addListener(new ChannelFutureListener() {
-
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
-						logger.info("发送修改设备配置命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.info("发送【修改基础配置】命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
 						// 更新code-channel映射表
 //						if (StringUtils.isNotBlank(deviceId)) {
 //							CodeMapping.getInstance().updateChannelMapping(oldDeviceId, deviceId);

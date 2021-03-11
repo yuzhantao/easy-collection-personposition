@@ -53,11 +53,11 @@ public interface IPersonPositionDeviceService {
 	PersonPositionDevice getOneByDeviceCode(String deviceCode);
 	
 	/**
-	 * 根据ip地址查询单个设备
+	 * 根据ip地址查询离线的设备集合
 	 * @param ip ip地址
-	 * @return 查询的设备实体
+	 * @return 设备实体集合
 	 */
-	List<PersonPositionDevice> getOneByIp(String ip);
+	List<PersonPositionDevice> getOfflineDevicesByIp(String ip);
 	
 	/**
 	 * 添加人员定位设备
@@ -88,7 +88,7 @@ public interface IPersonPositionDeviceService {
 	public int countByDeviceState(String deviceState);
 	
 	/**
-	 * 导出两天内历史数据到Excel
+	 * 导出实时数据到Excel
 	 * @param startTime 开始时间
 	 * @param endTime 结束时间
 	 * @param pageable

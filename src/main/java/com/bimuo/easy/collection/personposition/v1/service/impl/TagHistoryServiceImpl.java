@@ -121,7 +121,9 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
                     predicates.add(cb.lessThanOrEqualTo(root.get("createTime").as(Date.class), endTime));
                 }
                 // and到一起的话所有条件就是且关系，or就是或关系
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                criteriaQuery.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+                criteriaQuery.orderBy(cb.desc(root.get("createTime").as(Date.class))); // 按日期降序排列
+                return criteriaQuery.getRestriction();
             }
         };
         List<TagHistory> tags = tagHistoryRepository.findAll(specification);

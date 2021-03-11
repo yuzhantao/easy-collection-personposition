@@ -27,6 +27,7 @@ import com.bimuo.easy.collection.personposition.v1.exception.DeviceIpNoneExcepti
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.BrandInfo;
 import com.google.common.base.Preconditions;
 
@@ -52,10 +53,36 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 	}
 	
 	@Override
-	public List<PersonPositionDevice> getOneByIp(String ip) {
-		List<PersonPositionDevice> devices = this.personPositionDeviceRepository.getOneByIpAndIsEffective(ip,false); // 收到4F4B后已设置失效,所以断线重连时将失效的设备记录改为offline
-		AssertUtils.checkArgument(devices.isEmpty() == false, new DeviceIpNoneException());
-		return devices;
+	public List<PersonPositionDevice> getOfflineDevicesByIp(String ip) {
+		// 将主动断开的设备改为无效
+		List<PersonPositionDevice> activeOfflineDivices = this.personPositionDeviceRepository.getOneByIp(ip);
+		if(activeOfflineDivices.isEmpty()) {
+			log.error("管道异常,数据库不存在ip={},更新数据库失败!",ip);
+			AssertUtils.checkArgument(activeOfflineDivices.isEmpty() == false, new DeviceIpNoneException());
+		} else {
+			for(int i=0; i<activeOfflineDivices.size(); i++) {
+				if(activeOfflineDivices.get(i).isEffective()==false) { // 修改配置时已设置为无效记录
+					activeOfflineDivices.get(i).setDeviceState("offline");
+					activeOfflineDivices.get(i).setUpdateTime(new Date());
+					personPositionDeviceRepository.save(activeOfflineDivices.get(i));
+					log.error("人员定位【{}】已断开,ip为{},状态为{}",activeOfflineDivices.get(i).getDeviceCode(), ip, activeOfflineDivices.get(i).getDeviceState());
+					// 离线时删除code-channel映射,以备修改配置使用
+					CodeMapping.getInstance().removeChannelMapping(activeOfflineDivices.get(i).getDeviceCode());  // 避免断开连接时netty自动将管道清除
+					if(CodeMapping.getInstance().channelMappingContainsKey(activeOfflineDivices.get(i).getDeviceCode()) == false) {
+						log.debug("复位后设备【{}】映射删除成功",activeOfflineDivices.get(i).getDeviceCode());
+					} else {
+						log.error("复位后设备【{}】映射删除失败或并无该记录",activeOfflineDivices.get(i).getDeviceCode());
+					}
+				} else { // 主动断开是有效记录,仅把状态改为离线
+					activeOfflineDivices.get(i).setDeviceState("offline");
+					this.personPositionDeviceRepository.save(activeOfflineDivices.get(i));
+				}
+			}	
+		}
+		// 将断开的设备(改配置和主动断开的查出后状态改为offline)
+//		List<PersonPositionDevice> devices = this.personPositionDeviceRepository.getOneByIpAndIsEffective(ip,false); // 收到4F4B后已设置失效,所以断线重连时将失效的设备记录改为offline
+//		AssertUtils.checkArgument(devices.isEmpty() == false, new DeviceIpNoneException());
+		return activeOfflineDivices;
 	}
 	
 	@Override

@@ -87,6 +87,7 @@ public class PersonPositionDeviceController {
 		// TODO 是否需要打印日志?
 		dev.setCreateTime(new Date());
 		dev.setUpdateTime(new Date());
+		dev.setEffective(true);
 		boolean isSuccess = personPositionDeviceService.insert(dev);
 		Preconditions.checkArgument(isSuccess,new DeviceAddFailedException());
 		return ResponseEntity.ok(dev);

@@ -18,7 +18,7 @@ import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
 @Component
 @EnableScheduling // 定时任务注解,可以在启动类上注解也可以在当前类
 public class DataBaseClearTask {
-	private final static Logger log = LogManager.getLogger(GetPersonPositionDeviceConfigTask.class);
+	private final static Logger log = LogManager.getLogger(DataBaseClearTask.class);
 	
 	@Autowired
 	private ITagHistoryService tagHistoryService;
@@ -29,6 +29,6 @@ public class DataBaseClearTask {
 	@Scheduled(cron ="${database.cleartime}")
     public void runfirst() {
 		tagHistoryService.clearTable();
-		log.info("数据库更新成功!只留两天内实时数据!");
+		log.info("每晚23点数据库更新成功!只留两天内实时数据!");
     }
 }

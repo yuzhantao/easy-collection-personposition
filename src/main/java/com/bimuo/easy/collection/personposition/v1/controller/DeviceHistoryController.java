@@ -29,7 +29,7 @@ import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 
 /**
- * 设备历史信息控制器
+ * 设备历史信息控制器(此类没有用了)
  * 
  * @author Pingfan
  *
@@ -97,7 +97,7 @@ public class DeviceHistoryController {
 		List<BrandInfo> list = personPositionDeviceService.toExcel(realStartTime,realEndTime);
 		try {
 			// 设置响应输出的头类型及下载文件的默认名称
-			String fileName = new String("设备历史信息表.xls".getBytes("utf-8"), "ISO-8859-1");
+			String fileName = new String("历史标签表.xls".getBytes("utf-8"), "ISO-8859-1");
 			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 			response.setContentType("application/vnd.ms-excel;charset=gb2312");
 			// 导出
@@ -105,7 +105,7 @@ public class DeviceHistoryController {
 			workbook.write(response.getOutputStream());
 			log.info("Excel 导出成功!");
 		} catch (IOException e) {
-			log.info("Excel 导出异常：{}", e.getMessage());
+			log.error("Excel 导出异常：{}", e.getMessage());
 		}
 	}
 }

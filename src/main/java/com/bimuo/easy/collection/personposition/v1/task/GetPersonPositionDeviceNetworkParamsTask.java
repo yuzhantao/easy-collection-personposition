@@ -27,7 +27,7 @@ import io.netty.channel.group.ChannelGroupFutureListener;
 @Component
 @EnableScheduling // 定时任务注解,可以在启动类上注解也可以在当前类
 public class GetPersonPositionDeviceNetworkParamsTask {
-	private final static Logger log = LogManager.getLogger(GetPersonPositionDeviceConfigTask.class);
+	private final static Logger log = LogManager.getLogger(GetPersonPositionDeviceNetworkParamsTask.class);
 	private PersonPositionMessageFactory personPositionMessageFactory = new PersonPositionMessageFactory();
 	
 	byte[] networkParamsDatas = {0x02,0x03,0x04,0x05,0x00,0x08,0x00,0x58,0x47,0x00,0x41,(byte) 0xF6};  // 读取网络参数

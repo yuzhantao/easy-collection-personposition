@@ -19,7 +19,6 @@ import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDev
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceSettingService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
-import com.bimuo.easy.collection.personposition.v1.service.util.CommandStateMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port0Vo;
@@ -86,6 +85,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		}
 		if (sourceHardware != null && sourceHardware.length != 0) {
 			String sourceHardwareStr1 = Integer.toHexString(ByteUtil.byteToInt(sourceHardware[0]));
+			// TODO 需要调整显示00
 			if(sourceHardwareStr1.equals("0")) sourceHardwareStr1 = "00";
 			String sourceHardwareStr2 = Integer.toHexString(ByteUtil.byteToInt(sourceHardware[1]));
 			String sourceHardwareStr3 = Integer.toHexString(ByteUtil.byteToInt(sourceHardware[2]));
@@ -330,15 +330,15 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		}	
 		
 		byte[] command = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes(deviceId), (byte) 0x46, dataArr);
-		logger.info("向硬件发送的修改【网络参数】指令是{}", ByteUtil.byteArrToHexString(command, true));
+		logger.debug("向硬件发送的修改【网络参数】指令是{}", ByteUtil.byteArrToHexString(command, true));
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
 			if (channel == null) {
 				logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
 			} else if (!channel.isActive() || !channel.isWritable()) {
-				logger.info("设备编号【{}】的管道不可用", deviceId);
+				logger.error("设备编号【{}】的管道不可用", deviceId);
 			} else {
-				logger.info("设备编号【{}】对应的管道是{}", deviceId, channel);
+				logger.debug("设备编号【{}】对应的管道是{}", deviceId, channel);
 				ByteBuf bs = Unpooled.copiedBuffer(command);
 				ChannelFuture cf = channel.writeAndFlush(bs);
 				// 回调函数监听是否发送成功
@@ -346,9 +346,9 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 					@Override
 					public void operationComplete(ChannelFuture future) throws Exception {
 						if (future.isSuccess()) {
-							logger.info("发送修改网络参数命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+							logger.info("发送修改【网络参数】命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
 						} else {
-							logger.error("发送修改网络参数命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+							logger.error("发送修改【网络参数】命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
 						}
 					}
 				});
@@ -406,15 +406,15 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		}
 		
 		byte[] command = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes(deviceId), (byte) 0x46, dataArr);
-		logger.info("向硬件发送的修改端口指令是{}", ByteUtil.byteArrToHexString(command, true));
+		logger.debug("向硬件发送的修改端口指令是{}", ByteUtil.byteArrToHexString(command, true));
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
 		if (channel == null) {
 			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
 		} else if (!channel.isActive() || !channel.isWritable()) {
-			logger.info("设备编号【{}】的管道不可用", deviceId);
+			logger.error("设备编号【{}】的管道不可用", deviceId);
 		} else {
-			logger.info("设备编号【{}】对应的管道是{}", deviceId, channel);
+			logger.debug("设备编号【{}】对应的管道是{}", deviceId, channel);
 			ByteBuf bs = Unpooled.copiedBuffer(command);
 			ChannelFuture cf = channel.writeAndFlush(bs);
 			// 回调函数监听是否发送成功
@@ -422,9 +422,9 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
-						logger.info("发送修改端口命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.info("发送修改【端口】命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
 					} else {
-						logger.error("发送修改端口命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.error("发送修改【端口】命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
 					}
 				}
 			});
@@ -440,7 +440,13 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		// 更新网络参数
 		setNetworkParams(networkParams, sourceIp, subnetMask, gatway, sourceHardware);
 		// 更新原先记录
-		device.getDeviceSetting().setNetworkParams(networkParams);
+		if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+			DeviceSettingVo dsetting = new DeviceSettingVo();
+			dsetting.setNetworkParams(networkParams);
+			device.setDeviceSetting(dsetting);
+		} else {
+			device.getDeviceSetting().setNetworkParams(networkParams);
+		}
 		personPositionDeviceService.modify(device);
 		logger.debug("==========数据库【修改】设备编号【{}】网络参数成功!",device.getDeviceCode());
 		return networkParams;
@@ -455,7 +461,13 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		// 更新端口0配置
 		setPort0(port0, socket0dip, DPort, SPort, mode, enable);
 		// 更新原先记录
-		device.getDeviceSetting().setPort0(port0);
+		if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+			DeviceSettingVo dsetting = new DeviceSettingVo();
+			dsetting.setPort0(port0);
+			device.setDeviceSetting(dsetting);
+		} else {
+			device.getDeviceSetting().setPort0(port0);
+		}
 		personPositionDeviceService.modify(device);
 		logger.debug("==========数据库【修改】设备编号【{}】端口0成功!",device.getDeviceCode());
 		return port0;
@@ -470,7 +482,13 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		// 更新端口1配置
 		setPort1(port1, socket0dip, DPort, SPort, mode, enable);
 		// 更新原先记录
-		device.getDeviceSetting().setPort1(port1);
+		if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+			DeviceSettingVo dsetting = new DeviceSettingVo();
+			dsetting.setPort1(port1);
+			device.setDeviceSetting(dsetting);
+		} else {
+			device.getDeviceSetting().setPort1(port1);
+		}
 		personPositionDeviceService.modify(device);
 		logger.debug("==========数据库【修改】设备编号【{}】端口1成功!",device.getDeviceCode());
 		return port1;
@@ -485,7 +503,13 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 //		// 更新端口2配置
 //		setPort2(port2, socket0dip, DPort, SPort, mode, enable);
 //		// 更新原先记录
-//		device.getDeviceSetting().setPort2(port2);
+//		if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+//			DeviceSettingVo dsetting = new DeviceSettingVo();
+//			dsetting.setPort2(port2);
+//			device.setDeviceSetting(dsetting);
+//		} else {
+//			device.getDeviceSetting().setPort2(port2);
+//		}
 //		personPositionDeviceService.modify(device);
 //		logger.info("==========数据库【修改】设备编号【{}】端口2成功!",device.getDeviceCode());
 //		return port2;
@@ -500,7 +524,13 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 //		// 更新端口3配置
 //		setPort3(port3, socket0dip, DPort, SPort, mode, enable);
 //		// 更新原先记录
-//		device.getDeviceSetting().setPort3(port3);
+//		if(device.getDeviceSetting() == null) { // 重连或修改编号的新设备
+//			DeviceSettingVo dsetting = new DeviceSettingVo();
+//			dsetting.setPort2(port2);
+//			device.setDeviceSetting(dsetting);
+//		} else {
+//			device.getDeviceSetting().setPort2(port2);
+//		}
 //		personPositionDeviceService.modify(device);
 //		logger.info("==========数据库【修改】设备编号【{}】端口3成功!",device.getDeviceCode());
 //		return port3;
@@ -513,12 +543,12 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
 		if (channel == null) {
 			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
-			CommandStateMapping.getInstance().addStateMapping(deviceId, "NoChannel");
+			//CommandStateMapping.getInstance().addStateMapping(deviceId, "NoChannel");
 		} else if (!channel.isActive() || !channel.isWritable()) {
-			logger.info("设备编号【{}】的管道不可用", deviceId);
-			CommandStateMapping.getInstance().addStateMapping(deviceId, "ChannelDisable");
+			logger.error("设备编号【{}】的管道不可用", deviceId);
+			//CommandStateMapping.getInstance().addStateMapping(deviceId, "ChannelDisable");
 		} else {
-			logger.info("设备编号【{}】对应的管道是{}", deviceId, channel);
+			logger.debug("设备编号【{}】对应的管道是{}", deviceId, channel);
 			ByteBuf bs = Unpooled.copiedBuffer(command);
 			ChannelFuture cf = channel.writeAndFlush(bs);
 			// 回调函数监听是否发送成功
@@ -527,10 +557,10 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
 						// TODO 存在异步问题 还未执行监听时Controller已继续执行 则不会返回任何东西
-						logger.info("发送复位命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.info("向【{}】发送【复位】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Success");
 					} else {
-						logger.error("发送复位命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.error("发送【复位】命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
 						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Fail");
 					}
 				}
