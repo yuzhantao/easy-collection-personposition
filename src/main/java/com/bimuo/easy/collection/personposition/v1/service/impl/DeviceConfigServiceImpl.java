@@ -254,7 +254,7 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
-						logger.info("发送【修改基础配置】命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.info("向【{}】发送【修改基础配置】命令成功,下发命令={}", oldDeviceId, ByteUtil.byteArrToHexString(command, true));
 						// 更新code-channel映射表
 //						if (StringUtils.isNotBlank(deviceId)) {
 //							CodeMapping.getInstance().updateChannelMapping(oldDeviceId, deviceId);
@@ -265,7 +265,7 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 //							}
 //						}
 					} else {
-						logger.error("发送修改设备配置命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.error("向【{}】发送修改设备配置命令失败,下发命令={}", oldDeviceId, ByteUtil.byteArrToHexString(command, true));
 					}
 				}
 

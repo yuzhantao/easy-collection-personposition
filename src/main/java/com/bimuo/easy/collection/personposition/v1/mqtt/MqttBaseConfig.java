@@ -38,6 +38,7 @@ public class MqttBaseConfig {
         //如果配置了用户密码这里需要对应设置
         //options.setUserName();
         //options.setPassword();
+        options.setMaxInflight(10000);
         options.setServerURIs(new String[]{mqttHost});
         factory.setConnectionOptions(options);
         return factory;

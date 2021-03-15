@@ -30,7 +30,9 @@ public class GetPersonPositionDevicePort1ConfigTask {
 	private final static Logger log = LogManager.getLogger(GetPersonPositionDevicePort1ConfigTask.class);
 	private PersonPositionMessageFactory personPositionMessageFactory = new PersonPositionMessageFactory();
 	
-	byte[] port1ConfigDatas = {0x02,0x03,0x04,0x05,0x00,0x08,0x00,0x58,0x47,0x00,0x43,(byte) 0xF8}; // 读取端口1配置
+	byte[] data = {0x43}; // 端口1二级指令C,十六进制0x43
+	byte[] port1ConfigDatas = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes("0058"), (byte) 0x47, data);  // 读取端口1
+	//byte[] port1ConfigDatas = {0x02,0x03,0x04,0x05,0x00,0x0E,0x00,0x58,0x47,0x00,0x43,(byte) 0xFC}; // 读取端口1配置
 	
 	/**
 	 * 定时给硬件发送指令,轮询间隔10s

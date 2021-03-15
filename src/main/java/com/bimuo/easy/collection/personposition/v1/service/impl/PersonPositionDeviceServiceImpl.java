@@ -61,7 +61,7 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 			AssertUtils.checkArgument(activeOfflineDivices.isEmpty() == false, new DeviceIpNoneException());
 		} else {
 			for(int i=0; i<activeOfflineDivices.size(); i++) {
-				if(activeOfflineDivices.get(i).isEffective()==false) { // 修改配置时已设置为无效记录
+				if(activeOfflineDivices.get(i).isEffective() == false) { // 修改配置时已设置为无效记录
 					activeOfflineDivices.get(i).setDeviceState("offline");
 					activeOfflineDivices.get(i).setUpdateTime(new Date());
 					personPositionDeviceRepository.save(activeOfflineDivices.get(i));

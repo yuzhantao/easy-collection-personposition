@@ -728,7 +728,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 		} else {
 			long endTime = System.currentTimeMillis();
 			long waitTime= (endTime - startTime)/1000;
-			logger.error("【{}】正等待回复指定指令,已等待{}秒……",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),waitTime);
+			logger.error("【{}】已连接{}秒……",ByteUtil.byteArrToHexString(msg.getDevId()).toUpperCase(),waitTime);
 		}
 		// TODO 这里添加数量判断 linkDeviceCount
 		if (this.deviceIndex > 5 && PersonPositionResponseHandleContext.linkDeviceCount > 5) {

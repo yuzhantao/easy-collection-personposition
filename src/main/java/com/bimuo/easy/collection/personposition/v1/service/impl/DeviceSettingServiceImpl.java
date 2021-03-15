@@ -346,9 +346,9 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 					@Override
 					public void operationComplete(ChannelFuture future) throws Exception {
 						if (future.isSuccess()) {
-							logger.info("发送修改【网络参数】命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+							logger.info("向【{}】发送修改【网络参数】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						} else {
-							logger.error("发送修改【网络参数】命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+							logger.error("向【{}】发送修改【网络参数】命令失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						}
 					}
 				});
@@ -422,9 +422,9 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
-						logger.info("发送修改【端口】命令成功,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.info("向【{}】发送修改【端口】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 					} else {
-						logger.error("发送修改【端口】命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.error("向【{}】发送修改【端口】命令失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 					}
 				}
 			});
@@ -560,7 +560,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 						logger.info("向【{}】发送【复位】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Success");
 					} else {
-						logger.error("发送【复位】命令失败,下发命令={}", ByteUtil.byteArrToHexString(command, true));
+						logger.error("向【{}】发送【复位】命令失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Fail");
 					}
 				}

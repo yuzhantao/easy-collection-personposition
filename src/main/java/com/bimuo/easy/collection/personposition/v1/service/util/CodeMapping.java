@@ -1,5 +1,7 @@
 package com.bimuo.easy.collection.personposition.v1.service.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -98,6 +100,21 @@ public class CodeMapping {
 	 */
 	public boolean channelMappingContainsKey(String key) {
 		return codeMappingList.containsKey(key);
+	}
+	
+	/**
+	 * 获取全部设备编号(轮询设备状态使用)
+	 * 
+	 * @return map中存储的设备编号集合
+	 */
+	public List<String> findAllCode()	{
+		List<String> codeList = new ArrayList<String>();
+		for(int i=0; i<codeMappingList.size(); i++) {
+			for(String key : codeMappingList.keySet()) {
+				codeList.add(key);
+			}
+		}
+		return codeList;
 	}
 
 	/**

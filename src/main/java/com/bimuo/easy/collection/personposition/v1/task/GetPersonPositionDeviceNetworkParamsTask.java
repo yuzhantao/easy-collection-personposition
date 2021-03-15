@@ -30,7 +30,9 @@ public class GetPersonPositionDeviceNetworkParamsTask {
 	private final static Logger log = LogManager.getLogger(GetPersonPositionDeviceNetworkParamsTask.class);
 	private PersonPositionMessageFactory personPositionMessageFactory = new PersonPositionMessageFactory();
 	
-	byte[] networkParamsDatas = {0x02,0x03,0x04,0x05,0x00,0x08,0x00,0x58,0x47,0x00,0x41,(byte) 0xF6};  // 读取网络参数
+	byte[] data = {0x41}; // 网络参数二级指令A,十六进制0x41
+	byte[] networkParamsDatas = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes("0058"), (byte) 0x47, data);  // 读取网络参数
+	//byte[] networkParamsDatas = {0x02,0x03,0x04,0x05,0x00,0x0C,0x00,0x58,0x47,0x00,0x41,(byte) 0xFA};  // 读取网络参数
 	
 	/**
 	 * 定时给硬件发送指令,轮询间隔10s
