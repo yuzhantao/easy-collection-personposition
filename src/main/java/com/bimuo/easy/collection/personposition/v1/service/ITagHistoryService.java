@@ -73,4 +73,11 @@ public interface ITagHistoryService {
 	 * 清除表中两天之外的数据
 	 */
 	void clearTable();
+	
+	/**
+	 * 收到标签指令后向硬件回复
+	 * @param deviceId 设备编号
+	 * @param sn 流水号(crc正确sn=0,否则sn>0)
+	 */
+	void sendTagResponseToHardware(String deviceId, byte sn);
 }

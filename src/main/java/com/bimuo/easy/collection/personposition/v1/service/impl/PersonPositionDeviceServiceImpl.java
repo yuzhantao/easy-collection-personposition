@@ -19,12 +19,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceAddCodeNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeAlreadyExistsException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceCodeNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceIpNoneException;
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
+import com.bimuo.easy.collection.personposition.v1.mqtt.IMqttMessageSenderService;
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
@@ -46,6 +48,9 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 	@Autowired
 	private IPersonPositionDeviceRepository personPositionDeviceRepository;
 	
+	@Autowired
+	private IMqttMessageSenderService mqttMessageSenderService;
+	
 	@Override
 	public PersonPositionDevice getOneByDeviceCode(String deviceCode) {
 		PersonPositionDevice ppd = this.personPositionDeviceRepository.getOneByDeviceCode(deviceCode);
@@ -57,15 +62,17 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 		// 将主动断开的设备改为无效
 		List<PersonPositionDevice> activeOfflineDivices = this.personPositionDeviceRepository.getOneByIp(ip);
 		if(activeOfflineDivices.isEmpty()) {
-			log.error("管道异常,数据库不存在ip={},更新数据库失败!",ip);
-			AssertUtils.checkArgument(activeOfflineDivices.isEmpty() == false, new DeviceIpNoneException());
+			// TODO 断开出现在修改成功之后ip就不存在了
+			log.info("旧ip={}已更新",ip);
+			//log.error("管道异常,数据库不存在ip={},更新数据库失败!",ip);
+			//AssertUtils.checkArgument(activeOfflineDivices.isEmpty() == false, new DeviceIpNoneException());
 		} else {
 			for(int i=0; i<activeOfflineDivices.size(); i++) {
 				if(activeOfflineDivices.get(i).isEffective() == false) { // 修改配置时已设置为无效记录
 					activeOfflineDivices.get(i).setDeviceState("offline");
 					activeOfflineDivices.get(i).setUpdateTime(new Date());
 					personPositionDeviceRepository.save(activeOfflineDivices.get(i));
-					log.error("人员定位【{}】已断开,ip为{},状态为{}",activeOfflineDivices.get(i).getDeviceCode(), ip, activeOfflineDivices.get(i).getDeviceState());
+					log.error("ip={}修改配置后断开,状态为{}",ip, activeOfflineDivices.get(i).getDeviceState());
 					// 离线时删除code-channel映射,以备修改配置使用
 					CodeMapping.getInstance().removeChannelMapping(activeOfflineDivices.get(i).getDeviceCode());  // 避免断开连接时netty自动将管道清除
 					if(CodeMapping.getInstance().channelMappingContainsKey(activeOfflineDivices.get(i).getDeviceCode()) == false) {
@@ -75,7 +82,17 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 					}
 				} else { // 主动断开是有效记录,仅把状态改为离线
 					activeOfflineDivices.get(i).setDeviceState("offline");
+					log.error("ip={}主动断开,状态为{}",ip, activeOfflineDivices.get(i).getDeviceState());
 					this.personPositionDeviceRepository.save(activeOfflineDivices.get(i));
+					// 发送到mqtt,刷新页面设备状态为离线
+					String topic = "personpositon/" + activeOfflineDivices.get(i).getDeviceCode() + "/config";
+					String mqttData = JSONArray.toJSON(activeOfflineDivices.get(i).getDeviceSetting().getBaseConfig()).toString();
+					if (StringUtils.isNotBlank(topic)) {
+						mqttMessageSenderService.sendToMqtt(topic, mqttData);
+						log.debug("【{}】发送mqtt消息完成,主题:{},消息:{}", activeOfflineDivices.get(i).getDeviceCode(), topic, mqttData);
+					} else {
+						log.error("【{}】发送mqtt消息失败,主题:{},消息:{}", activeOfflineDivices.get(i).getDeviceCode(), topic, mqttData);
+					}
 				}
 			}	
 		}

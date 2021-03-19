@@ -9,6 +9,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 网页端接收mqtt消息刷新网页
+ * 
+ * @author yuzhantao
+ *
+ */
 @RestController
 @RequestMapping("/mqtt-config")
 public class MqttConfigController {

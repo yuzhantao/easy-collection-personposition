@@ -22,13 +22,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bimuo.easy.collection.personposition.core.util.AssertUtils;
+import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.exception.TagAddIdNoneException;
 import com.bimuo.easy.collection.personposition.v1.exception.TagIdAlreadyExistsException;
 import com.bimuo.easy.collection.personposition.v1.model.TagHistory;
 import com.bimuo.easy.collection.personposition.v1.repository.ITagHistoryRepository;
 import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.TagHistoryToExcel;
 import com.google.common.base.Preconditions;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 
 @Service
 public class TagHistoryServiceImpl implements ITagHistoryService {
@@ -151,4 +159,39 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
 		log.info("只留两天内实时数据成功!");
 	}
 
+	@Override
+	public void sendTagResponseToHardware(String deviceId, byte sn) {
+		byte crc = 0;
+		if(sn == 0) { // sn=0表示标签crc合法
+			crc = (byte) 0xB2;
+		} else { // sn>0表示标签crc不合法
+			crc = (byte) 0xB3;
+		}
+		byte[] command = {0x02, 0x03, 0x04, 0x05, 0x00, 0x0B, 0x00, 0x58, 0x41, sn, crc};
+		// 根据code-channel映射表取设备对应管道
+		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
+		if (channel == null) {
+			log.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
+		} else if (!channel.isActive() || !channel.isWritable()) {
+			log.error("设备编号【{}】的管道不可用", deviceId);
+		} else {
+			log.debug("设备编号【{}】对应的管道是{}", deviceId, channel);
+			ByteBuf bs = Unpooled.copiedBuffer(command);
+			ChannelFuture cf = channel.writeAndFlush(bs);
+			// 回调函数监听是否发送成功
+			cf.addListener(new ChannelFutureListener() {
+				@Override
+				public void operationComplete(ChannelFuture future) throws Exception {
+					if (future.isSuccess()) {
+						// TODO 存在异步问题 还未执行监听时Controller已继续执行 则不会返回任何东西
+						log.debug("向【{}】发送【回复标签】成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
+						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Success");
+					} else {
+						log.error("向【{}】发送【回复标签】失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
+						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Fail");
+					}
+				}
+			});
+		}
+	}
 }

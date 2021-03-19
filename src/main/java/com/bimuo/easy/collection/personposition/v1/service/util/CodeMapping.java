@@ -58,7 +58,7 @@ public class CodeMapping {
 		}
 		Channel channel = channels.find(codeMappingList.get(mappingKey));
 		if(channel == null) {
-			logger.error("编号【{}】的管道已被系统删除!",mappingKey);
+			logger.debug("编号【{}】的管道已被系统删除!",mappingKey);
 			return channel;
 		} else {
 			return channel;
