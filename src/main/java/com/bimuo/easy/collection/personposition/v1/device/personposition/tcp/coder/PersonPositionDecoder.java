@@ -146,7 +146,7 @@ public class PersonPositionDecoder extends LengthFieldBasedFrameDecoder {
 //		logger.info("解码前可读字节：{}",in.readableBytes());
 //		in.readBytes(allData);
 //		logger.info("解码完可读字节：{}",in.readableBytes());
-//		logger.info("====硬件的指令：" + ByteUtil.byteArrToHexString(allData,true));
+//		logger.info("硬件的指令：" + ByteUtil.byteArrToHexString(allData,true));
 //		in.resetReaderIndex(); // 还原到读标记位置
 
 //		if (this.data != null) { // body不等于空说明上一次读到完整数据了
