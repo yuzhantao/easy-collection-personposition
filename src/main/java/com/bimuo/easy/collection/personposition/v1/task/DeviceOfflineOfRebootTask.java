@@ -27,7 +27,7 @@ public class DeviceOfflineOfRebootTask implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		logger.info("设备已全部离线");
+		logger.debug("设备已全部离线");
 		personPositionDeviceService.updateDeviceOffline();
 	}
 	
