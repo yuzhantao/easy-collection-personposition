@@ -1,26 +1,14 @@
 package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.coder;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.bimuo.easy.collection.personposition.core.annotation.NotProguard;
-import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessage;
-import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
-import com.google.gson.JsonObject;
-
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
@@ -226,6 +214,10 @@ public class PersonPositionDecoder extends LengthFieldBasedFrameDecoder {
 //	        return null;
 		} else {
 			in.readByte(); // 未声明校验位变量,为使下一次指令从头开始读取,需要重读校验位
+			// TODO 治理内存泄露
+//			if(in.readableBytes() == 0) {
+//				in.release();
+//			}
 			PersonPositionMessage message = new PersonPositionMessage(devId, cmdType, sn, data);
 			return message;
 		}

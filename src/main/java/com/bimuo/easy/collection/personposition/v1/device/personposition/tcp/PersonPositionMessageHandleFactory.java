@@ -36,7 +36,7 @@ public class PersonPositionMessageHandleFactory implements IMessageHandleFactory
 	
 	@Override
 	public ChannelHandler createMessageDecoder() {
-		return new PersonPositionDecoder(Integer.MAX_VALUE, 6, 2, 2, 0, true);
+		return new PersonPositionDecoder(Integer.MAX_VALUE,4, 2, -11, 0, true);
 	}
 
 	@Override

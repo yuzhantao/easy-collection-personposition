@@ -258,7 +258,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 							@Override
 							public void operationComplete(ChannelFuture future) throws Exception {
 								if (future.isSuccess()) {
-									logger.info("【{}】发送复位命令成功,下发命令={}", deviceIdHexStr, ByteUtil.byteArrToHexString(command, true));
+									logger.debug("【{}】发送复位命令成功,下发命令={}", deviceIdHexStr, ByteUtil.byteArrToHexString(command, true));
 								} else {
 									logger.error("【{}】发送复位命令失败,下发命令={}", deviceIdHexStr, ByteUtil.byteArrToHexString(command, true));
 								}
@@ -300,7 +300,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 							@Override
 							public void operationComplete(ChannelFuture future) throws Exception {
 								if (future.isSuccess()) {
-									logger.info("【{}】发送复位命令成功,下发命令={}", deviceIdHexStr, ByteUtil.byteArrToHexString(command, true));
+									logger.debug("【{}】发送复位命令成功,下发命令={}", deviceIdHexStr, ByteUtil.byteArrToHexString(command, true));
 								} else {
 									logger.error("【{}】发送复位命令失败,下发命令={}", deviceIdHexStr, ByteUtil.byteArrToHexString(command, true));
 								}
@@ -343,6 +343,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 				PersonPositionDevice device = personPositionDeviceService.getOneByDeviceCode(deviceIdHexStr);
 				// 部分更新数据库总配置信息,修改网络参数以及端口,以二级指令INS区分
 				if (data[0] == 0x41) { // INS二级指令为A,表示网络参数指令
+//					logger.info("收到【{}】回复网络参数!", deviceIdHexStr);
 					// 解析设备回复的网络参数
 					byte[] sourceIpArr = new byte[4];
 					System.arraycopy(data, 1, sourceIpArr, 0, 4);
@@ -364,6 +365,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 					}
 					personPositionDeviceService.modify(device);
 				} else if (data[0] == 0x42) { // INS二级指令为B(42)表示端口0
+//					logger.info("收到【{}】回复端口0配置!", deviceIdHexStr);
 					// 解析设备回复的端口0配置
 					byte[] socket0DIPArr = new byte[4];
 					System.arraycopy(data, 1, socket0DIPArr, 0, 4);
@@ -384,6 +386,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 					}
 					personPositionDeviceService.modify(device);
 				} else if (data[0] == 0x43) { // INS二级指令为C(43)表示端口1
+//					logger.info("收到【{}】回复端口1配置!", deviceIdHexStr);
 					// 解析设备回复的端口1配置
 					byte[] socket0DIPArr = new byte[4];
 					System.arraycopy(data, 1, socket0DIPArr, 0, 4);
@@ -473,7 +476,8 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			}
 			
 			if (cmdType == 0x44) { // 0x44协议用来读取设备配置
-				logger.debug("==========设备回复指令的协议是:" + cmdType + " " + "Data段是:" + dataHexStr);
+//				logger.debug("收到【{}】回复基础配置!", deviceIdHexStr);
+//				logger.debug("==========设备回复指令的协议是:" + cmdType + " " + "Data段是:" + dataHexStr);
 				// 1.处理设备信息
 				// 一旦设备连接,查到设备则更新数据库设备状态、更新时间、ip,然后存到数据库,没查到则插入一条新数据
 				PersonPositionDevice dev = personPositionDeviceService.getOneByDeviceCode(deviceIdHexStr);

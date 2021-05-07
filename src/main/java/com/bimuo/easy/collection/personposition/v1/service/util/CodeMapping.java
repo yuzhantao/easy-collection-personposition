@@ -1,7 +1,9 @@
 package com.bimuo.easy.collection.personposition.v1.service.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -115,6 +117,19 @@ public class CodeMapping {
 			}
 		}
 		return codeList;
+	}
+	
+	/**
+	 * 获取映射表全部元素(验证管道时使用)
+	 * 
+	 * @return
+	 */
+	public Map<String, ChannelId> getAll(){
+		Map<String, ChannelId> allMap = new HashMap<String, ChannelId>();
+		for (Map.Entry<String, ChannelId> entry : codeMappingList.entrySet()) {
+		    allMap.put(entry.getKey(), entry.getValue());
+		}
+		return allMap;
 	}
 
 	/**

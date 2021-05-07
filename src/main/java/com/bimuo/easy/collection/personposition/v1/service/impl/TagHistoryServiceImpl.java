@@ -156,7 +156,7 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
 	@Override
 	public void clearTable() {
 		this.tagHistoryRepository.clearTableMoreThanTwoDays();
-		log.info("只留两天内实时数据成功!");
+		log.debug("只留两天内实时数据成功!");
 	}
 
 	@Override

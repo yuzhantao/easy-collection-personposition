@@ -196,7 +196,7 @@ public class DeviceConfigController {
 		AssertUtils.checkArgument(StringUtils.isNotBlank(deviceId),new DeviceConfigCodeNoneException());
 		PersonPositionDevice ppd = this.personPositionDeviceService.getOneByDeviceCode(deviceId);
 		AssertUtils.checkArgument(ppd != null, new DeviceCodeNoneException());
-		//		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
+//		AssertUtils.checkArgument(StringUtils.isNotBlank(json),new DeviceConfigAllParamNoneException());
 //		DeviceBaseConfigVo baseConfig = JSONObject.parseObject(json, DeviceBaseConfigVo.class);
 		// 发修改网络参数命令给硬件
 		deviceConfigService.updateHardwareBaseConfig(deviceId, baseConfig.getDeviceId(), baseConfig.getCain1(), baseConfig.getCain2(), 

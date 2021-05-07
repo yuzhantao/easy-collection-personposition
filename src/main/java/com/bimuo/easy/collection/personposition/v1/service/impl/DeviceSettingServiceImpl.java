@@ -330,7 +330,10 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		}	
 		
 		byte[] command = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes(deviceId), (byte) 0x46, dataArr);
+		
 		logger.debug("向硬件发送的修改【网络参数】指令是{}", ByteUtil.byteArrToHexString(command, true));
+		logger.info("正在向【{}】下发【修改网络参数】指令……", deviceId);
+		
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
 			if (channel == null) {
@@ -346,7 +349,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 					@Override
 					public void operationComplete(ChannelFuture future) throws Exception {
 						if (future.isSuccess()) {
-							logger.info("向【{}】发送修改【网络参数】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
+							logger.debug("向【{}】发送修改【网络参数】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						} else {
 							logger.error("向【{}】发送修改【网络参数】命令失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						}
@@ -406,7 +409,10 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		}
 		
 		byte[] command = PersonPositionMessageFactory.createMessage(ByteUtil.hexStringToBytes(deviceId), (byte) 0x46, dataArr);
+		
 		logger.debug("向硬件发送的修改端口指令是{}", ByteUtil.byteArrToHexString(command, true));
+		logger.info("正在向【{}】下发【修改端口】指令……", deviceId);
+		
 		// 根据code-channel映射表取设备对应管道
 		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
 		if (channel == null) {
@@ -422,7 +428,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
-						logger.info("向【{}】发送修改【端口】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
+						logger.debug("向【{}】发送修改【端口】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 					} else {
 						logger.error("向【{}】发送修改【端口】命令失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 					}

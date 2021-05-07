@@ -22,6 +22,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class CollectionServer extends AbstractExecutionThreadService {
@@ -88,8 +89,12 @@ public class CollectionServer extends AbstractExecutionThreadService {
 			serverBootstrap.handler(new LoggingHandler());
 			serverBootstrap.childHandler(new NettyChannelHandler(factory, writeTimetou, readTime));
 			serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
+			
+			// 治理内存泄露
+			ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.ADVANCED);
+			
 			ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
-			logger.info("{}(port={}) 程序名(端口)", this.getServerName(), this.getServerPort());
+			logger.info("{}(port={}) 服务已开启", this.getServerName(), this.getServerPort());
 			channelFuture.channel().closeFuture().sync();
 		} finally {
 			this.destory();
