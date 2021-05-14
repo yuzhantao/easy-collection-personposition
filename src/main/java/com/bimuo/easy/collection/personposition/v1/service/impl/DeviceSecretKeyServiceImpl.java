@@ -9,7 +9,7 @@ import com.bimuo.easy.collection.personposition.core.util.ByteUtil;
 import com.bimuo.easy.collection.personposition.v1.device.personposition.tcp.message.PersonPositionMessageFactory;
 import com.bimuo.easy.collection.personposition.v1.exception.DeviceSecretKeyFormatException;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceSecretKeyService;
-import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeChannelMapping;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -55,7 +55,7 @@ public class DeviceSecretKeyServiceImpl implements IDeviceSecretKeyService {
 	 */
 	private void sendCommandToHardware(String deviceId, byte[] command) {
 		// 根据code-channel映射表取设备对应管道
-		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
+		Channel channel = CodeChannelMapping.getInstance().getChannel(deviceId);
 		if (channel == null) {
 			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
 		} else if (!channel.isActive() || !channel.isWritable()) {

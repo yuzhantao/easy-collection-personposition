@@ -58,7 +58,7 @@ import com.bimuo.easy.collection.personposition.v1.service.IDeviceSettingService
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
 import com.bimuo.easy.collection.personposition.v1.service.PersonPositionEventBusService;
-import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeChannelMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
@@ -208,17 +208,17 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 			String deviceIdHexStr = ByteUtil.byteArrToHexString(deviceIdArray).toUpperCase();
 			
 			// 添加管道并记录在code-channel映射表,以备修改硬件配置时,根据设备编号查询管道,同时还需要判断连接的设备编号是否在映射表中
-			if (CodeMapping.getInstance().channelMappingContainsKey(deviceIdHexStr) == false // 映射表里没有该映射
-					|| CodeMapping.getInstance().getChannel(deviceIdHexStr) == null) { // 映射表里有编号但断线重连时netty将管道删除
-				CodeMapping.getInstance().addChannel(ctx.channel()); // 新添加code-channel映射
-				CodeMapping.getInstance().addChannelMapping(deviceIdHexStr, ctx.channel());
+			if (CodeChannelMapping.getInstance().channelMappingContainsKey(deviceIdHexStr) == false // 映射表里没有该映射
+					|| CodeChannelMapping.getInstance().getChannel(deviceIdHexStr) == null) { // 映射表里有编号但断线重连时netty将管道删除
+				CodeChannelMapping.getInstance().addChannel(ctx.channel()); // 新添加code-channel映射
+				CodeChannelMapping.getInstance().addChannelMapping(deviceIdHexStr, ctx.channel());
 				if(ByteUtil.byteArrToShort(deviceIdArray) < 10) {
 					logger.error("编号【{}】异常",deviceIdHexStr);
 				}
 				logger.debug("新添加code-channel映射,设备编号={},管道={}", deviceIdHexStr, ctx.channel());
 				logger.info("【{}】连接成功", deviceIdHexStr);
 			} else {
-				logger.debug("code-channel表中存在该映射,设备编号={},管道={}", deviceIdHexStr, CodeMapping.getInstance().getChannel(deviceIdHexStr));
+				logger.debug("code-channel表中存在该映射,设备编号={},管道={}", deviceIdHexStr, CodeChannelMapping.getInstance().getChannel(deviceIdHexStr));
 			}
 
 			// 数据段
@@ -245,7 +245,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 					// 硬件修改成功,发送复位指令
 					byte[] command = { 0x02, 0x03, 0x04, 0x05, 0x00, 0x13, 0x00, 0x58, 0x61, 0x00, 0x4D, 0x43,
 							0x55, 0x52, 0x45, 0x53, 0x45, 0x54, 0x42 };
-					Channel channel = CodeMapping.getInstance().getChannel(deviceIdHexStr);
+					Channel channel = CodeChannelMapping.getInstance().getChannel(deviceIdHexStr);
 					if (channel == null) {
 						logger.error("code-channel表中不存在设备编号【{}】的管道", deviceIdHexStr);
 					} else {
@@ -287,7 +287,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 					// 硬件修改成功,发送复位指令
 					byte[] command = { 0x02, 0x03, 0x04, 0x05, 0x00, 0x13, 0x00, 0x58, 0x61, 0x00, 0x4D, 0x43,
 							0x55, 0x52, 0x45, 0x53, 0x45, 0x54, 0x42 };
-					Channel channel = CodeMapping.getInstance().getChannel(deviceIdHexStr);
+					Channel channel = CodeChannelMapping.getInstance().getChannel(deviceIdHexStr);
 					if (channel == null) {
 						logger.error("code-channel表中不存在设备编号【{}】的管道", deviceIdHexStr);
 					} else {

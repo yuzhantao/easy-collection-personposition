@@ -29,7 +29,7 @@ import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.mqtt.IMqttMessageSenderService;
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
-import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeChannelMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.BrandInfo;
 import com.google.common.base.Preconditions;
 
@@ -74,8 +74,8 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 					personPositionDeviceRepository.save(activeOfflineDivices.get(i));
 					log.error("ip={}修改配置后断开,状态为{}",ip, activeOfflineDivices.get(i).getDeviceState());
 					// 离线时删除code-channel映射,以备修改配置使用
-					CodeMapping.getInstance().removeChannelMapping(activeOfflineDivices.get(i).getDeviceCode());  // 避免断开连接时netty自动将管道清除
-					if(CodeMapping.getInstance().channelMappingContainsKey(activeOfflineDivices.get(i).getDeviceCode()) == false) {
+					CodeChannelMapping.getInstance().removeChannelMapping(activeOfflineDivices.get(i).getDeviceCode());  // 避免断开连接时netty自动将管道清除
+					if(CodeChannelMapping.getInstance().channelMappingContainsKey(activeOfflineDivices.get(i).getDeviceCode()) == false) {
 						log.debug("复位后设备【{}】映射删除成功",activeOfflineDivices.get(i).getDeviceCode());
 					} else {
 						log.error("复位后设备【{}】映射删除失败或并无该记录",activeOfflineDivices.get(i).getDeviceCode());

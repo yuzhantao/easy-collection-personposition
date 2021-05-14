@@ -18,7 +18,8 @@ import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceSettingService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
-import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeChannelMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeTimeMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.NetworkParamsVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.Port0Vo;
@@ -335,21 +336,28 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		logger.info("正在向【{}】下发【修改网络参数】指令……", deviceId);
 		
 		// 根据code-channel映射表取设备对应管道
-		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
+		Channel channel = CodeChannelMapping.getInstance().getChannel(deviceId);
 			if (channel == null) {
 				logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
 			} else if (!channel.isActive() || !channel.isWritable()) {
 				logger.error("设备编号【{}】的管道不可用", deviceId);
 			} else {
 				logger.debug("设备编号【{}】对应的管道是{}", deviceId, channel);
+				
+				// 记录指令发送时间,并保存到映射
+				Long sendTime = System.currentTimeMillis();
+				CodeTimeMapping.getInstance().addCodeDateMapping(deviceId, sendTime);
+				
 				ByteBuf bs = Unpooled.copiedBuffer(command);
 				ChannelFuture cf = channel.writeAndFlush(bs);
+				
 				// 回调函数监听是否发送成功
 				cf.addListener(new ChannelFutureListener() {
 					@Override
 					public void operationComplete(ChannelFuture future) throws Exception {
 						if (future.isSuccess()) {
-							logger.debug("向【{}】发送修改【网络参数】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
+							CodeTimeMapping.getInstance().removeCodeTimeMapping(deviceId);
+							logger.info("向【{}】发送修改【网络参数】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						} else {
 							logger.error("向【{}】发送修改【网络参数】命令失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						}
@@ -414,21 +422,28 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 		logger.info("正在向【{}】下发【修改端口】指令……", deviceId);
 		
 		// 根据code-channel映射表取设备对应管道
-		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
+		Channel channel = CodeChannelMapping.getInstance().getChannel(deviceId);
 		if (channel == null) {
 			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
 		} else if (!channel.isActive() || !channel.isWritable()) {
 			logger.error("设备编号【{}】的管道不可用", deviceId);
 		} else {
 			logger.debug("设备编号【{}】对应的管道是{}", deviceId, channel);
+			
+			// 记录指令发送时间,并保存到映射
+			Long sendTime = System.currentTimeMillis();
+			CodeTimeMapping.getInstance().addCodeDateMapping(deviceId, sendTime);
+			
 			ByteBuf bs = Unpooled.copiedBuffer(command);
 			ChannelFuture cf = channel.writeAndFlush(bs);
+			
 			// 回调函数监听是否发送成功
 			cf.addListener(new ChannelFutureListener() {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
-						logger.debug("向【{}】发送修改【端口】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
+						CodeTimeMapping.getInstance().removeCodeTimeMapping(deviceId);
+						logger.info("向【{}】发送修改【端口】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 					} else {
 						logger.error("向【{}】发送修改【端口】命令失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 					}
@@ -546,7 +561,7 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 	public void resetHardware(String deviceId) {
 		byte[] command = {0x02,0x03,0x04,0x05,0x00,0x13,0x00,0x58,0x61,0x00,0x4D,0x43,0x55,0x52,0x45,0x53,0x45,0x54,0x42};
 		// 根据code-channel映射表取设备对应管道
-		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
+		Channel channel = CodeChannelMapping.getInstance().getChannel(deviceId);
 		if (channel == null) {
 			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
 			//CommandStateMapping.getInstance().addStateMapping(deviceId, "NoChannel");
@@ -555,14 +570,21 @@ public class DeviceSettingServiceImpl implements IDeviceSettingService {
 			//CommandStateMapping.getInstance().addStateMapping(deviceId, "ChannelDisable");
 		} else {
 			logger.debug("设备编号【{}】对应的管道是{}", deviceId, channel);
+			
+			// 记录指令发送时间,并保存到映射
+			Long sendTime = System.currentTimeMillis();
+			CodeTimeMapping.getInstance().addCodeDateMapping(deviceId, sendTime);
+			
 			ByteBuf bs = Unpooled.copiedBuffer(command);
 			ChannelFuture cf = channel.writeAndFlush(bs);
+			
 			// 回调函数监听是否发送成功
 			cf.addListener(new ChannelFutureListener() {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
 						// TODO 存在异步问题 还未执行监听时Controller已继续执行 则不会返回任何东西
+						CodeTimeMapping.getInstance().removeCodeTimeMapping(deviceId);
 						logger.info("向【{}】发送【复位】命令成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Success");
 					} else {

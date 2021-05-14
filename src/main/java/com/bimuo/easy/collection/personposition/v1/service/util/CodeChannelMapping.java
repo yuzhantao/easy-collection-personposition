@@ -22,18 +22,18 @@ import io.netty.util.concurrent.GlobalEventExecutor;
  * @author Pingfan
  *
  */
-public class CodeMapping {
-	protected final static Logger logger = LogManager.getLogger(CodeMapping.class);
+public class CodeChannelMapping {
+	protected final static Logger logger = LogManager.getLogger(CodeChannelMapping.class);
 	public static ChannelGroup channels = new DefaultChannelGroup("ChannelGroup" + UUID.randomUUID(),
 			GlobalEventExecutor.INSTANCE);
 	private static ConcurrentHashMap<String, ChannelId> codeMappingList = new ConcurrentHashMap<>();
 
-	private static CodeMapping instance;
+	private static CodeChannelMapping instance;
 
 	/**
 	 * 私有化构造函数
 	 */
-	public CodeMapping() {
+	public CodeChannelMapping() {
 	}
 
 	/**
@@ -41,9 +41,9 @@ public class CodeMapping {
 	 * 
 	 * @return
 	 */
-	public static synchronized CodeMapping getInstance() {
+	public static CodeChannelMapping getInstance() {
 		if (instance == null) {
-			instance = new CodeMapping();
+			instance = new CodeChannelMapping();
 		}
 		return instance;
 	}

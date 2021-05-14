@@ -28,7 +28,7 @@ import com.bimuo.easy.collection.personposition.v1.exception.TagIdAlreadyExistsE
 import com.bimuo.easy.collection.personposition.v1.model.TagHistory;
 import com.bimuo.easy.collection.personposition.v1.repository.ITagHistoryRepository;
 import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
-import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeChannelMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.TagHistoryToExcel;
 import com.google.common.base.Preconditions;
 
@@ -169,7 +169,7 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
 		}
 		byte[] command = {0x02, 0x03, 0x04, 0x05, 0x00, 0x0B, 0x00, 0x58, 0x41, sn, crc};
 		// 根据code-channel映射表取设备对应管道
-		Channel channel = CodeMapping.getInstance().getChannel(deviceId);
+		Channel channel = CodeChannelMapping.getInstance().getChannel(deviceId);
 		if (channel == null) {
 			log.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", deviceId);
 		} else if (!channel.isActive() || !channel.isWritable()) {
@@ -187,7 +187,7 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
 						log.debug("向【{}】发送【回复标签】成功,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Success");
 					} else {
-						log.error("向【{}】发送【回复标签】失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
+						log.debug("向【{}】发送【回复标签】失败,下发命令={}", deviceId, ByteUtil.byteArrToHexString(command, true));
 						//CommandStateMapping.getInstance().addStateMapping(deviceId, "Fail");
 					}
 				}

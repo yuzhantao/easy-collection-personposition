@@ -21,7 +21,8 @@ import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IDeviceConfigService;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
-import com.bimuo.easy.collection.personposition.v1.service.util.CodeMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeChannelMapping;
+import com.bimuo.easy.collection.personposition.v1.service.util.CodeTimeMapping;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceBaseConfigVo;
 import com.bimuo.easy.collection.personposition.v1.service.vo.setting.DeviceSettingVo;
 import com.google.common.base.Preconditions;
@@ -240,21 +241,29 @@ public class DeviceConfigServiceImpl implements IDeviceConfigService {
 		logger.debug("向硬件发送的修改配置指令是{}", ByteUtil.byteArrToHexString(command, true));
 		logger.info("正在向【{}】下发【修改基础配置】指令……", oldDeviceId);
 		// 根据code-channel映射表取设备对应管道
-		Channel channel = CodeMapping.getInstance().getChannel(oldDeviceId);
+		Channel channel = CodeChannelMapping.getInstance().getChannel(oldDeviceId);
 		if (channel == null) {
 			logger.error("code-channel表中不存在设备编号【{}】的管道或该管道已被系统删除", oldDeviceId);
 		} else if (!channel.isActive() || !channel.isWritable()) {
 			logger.error("设备编号【{}】的管道不可用", oldDeviceId);
 		} else {
 			logger.debug("设备编号【{}】对应的管道是{}", oldDeviceId, channel);
+			
+			// 记录指令发送时间,并保存到映射
+			Long sendTime = System.currentTimeMillis();
+			CodeTimeMapping.getInstance().addCodeDateMapping(oldDeviceId, sendTime);
+					
 			ByteBuf bs = Unpooled.copiedBuffer(command);
 			ChannelFuture cf = channel.writeAndFlush(bs);
+			
 			// 回调函数监听是否发送成功
 			cf.addListener(new ChannelFutureListener() {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if (future.isSuccess()) {
-						logger.debug("向【{}】发送【修改基础配置】命令成功,下发命令={}", oldDeviceId, ByteUtil.byteArrToHexString(command, true));
+						// 监听到指令下达,删除映射
+						CodeTimeMapping.getInstance().removeCodeTimeMapping(oldDeviceId);
+						logger.info("向【{}】发送【修改基础配置】命令成功,下发命令={}", oldDeviceId, ByteUtil.byteArrToHexString(command, true));
 						// 更新code-channel映射表
 //						if (StringUtils.isNotBlank(deviceId)) {
 //							CodeMapping.getInstance().updateChannelMapping(oldDeviceId, deviceId);
