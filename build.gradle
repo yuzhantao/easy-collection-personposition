@@ -36,11 +36,11 @@ dependencies {
 	implementation 'org.apache.activemq:activemq-mqtt:5.15.13'
 	implementation 'org.apache.activemq:activemq-stomp:5.16.0'
 	compile group: 'net.jodah', name: 'expiringmap', version: '0.5.9'
-	compile group: 'org.apache.poi', name: 'poi', version: '4.1.2'
-	compile group: 'cn.afterturn', name: 'easypoi', version: '4.0.0'
-    compile group: 'cn.afterturn', name: 'easypoi-base', version: '4.0.0'
-    compile group: 'cn.afterturn', name: 'easypoi-annotation', version: '4.0.0'
-    compile group: 'cn.afterturn', name: 'easypoi-web', version: '4.0.0'
+	//compile group: 'org.apache.poi', name: 'poi', version: '4.1.2'
+	//compile group: 'cn.afterturn', name: 'easypoi', version: '4.0.0'
+    //compile group: 'cn.afterturn', name: 'easypoi-base', version: '4.0.0'
+    //compile group: 'cn.afterturn', name: 'easypoi-annotation', version: '4.0.0'
+    //compile group: 'cn.afterturn', name: 'easypoi-web', version: '4.0.0'
 	compileOnly 'org.projectlombok:lombok'
 	// developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'mysql:mysql-connector-java'
@@ -69,6 +69,10 @@ dependencies {
 	//implementation 'org.reflections:reflections:0.9.12'
 	//implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 	testImplementation 'com.bug-cloud:bugcloud-junit-core:0.0.2'
+	
+	implementation group: 'cn.hutool', name: 'hutool-poi', version: '5.6.5'
+	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+	
 }
 
 configurations.all {

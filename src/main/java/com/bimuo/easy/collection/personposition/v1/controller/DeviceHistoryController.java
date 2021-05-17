@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Workbook;
+//import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,8 +25,8 @@ import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.vo.BrandInfo;
 
-import cn.afterturn.easypoi.excel.ExcelExportUtil;
-import cn.afterturn.easypoi.excel.entity.ExportParams;
+//import cn.afterturn.easypoi.excel.ExcelExportUtil;
+//import cn.afterturn.easypoi.excel.entity.ExportParams;
 
 /**
  * 设备历史信息控制器(此类没有用了)
@@ -101,8 +101,8 @@ public class DeviceHistoryController {
 			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 			response.setContentType("application/vnd.ms-excel;charset=gb2312");
 			// 导出
-			Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams(), BrandInfo.class, list);
-			workbook.write(response.getOutputStream());
+//			Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams(), BrandInfo.class, list);
+//			workbook.write(response.getOutputStream());
 			log.info("Excel 导出成功!");
 		} catch (IOException e) {
 			log.error("Excel 导出异常：{}", e.getMessage());

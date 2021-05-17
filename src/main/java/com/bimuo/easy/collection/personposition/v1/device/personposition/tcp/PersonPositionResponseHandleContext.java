@@ -3,10 +3,10 @@ package com.bimuo.easy.collection.personposition.v1.device.personposition.tcp;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -582,7 +582,7 @@ public class PersonPositionResponseHandleContext extends SimpleChannelInboundHan
 					tags = td.decoder(msgList.get(i));
 				}
 				// 标签历史存储扩展属性的map
-				Map<String, Object> tagExtendParamsMap = new HashedMap<String, Object>();
+				Map<String, Object> tagExtendParamsMap = new HashMap<String, Object>();
 				// 1.标签历史存到数据库
 				for (int j = 0; j < tags.size(); j++) {
 					if (tags.get(j) instanceof Tag0Vo) {

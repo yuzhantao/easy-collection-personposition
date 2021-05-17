@@ -139,17 +139,24 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
 	}
 
 	@Override
-	public List<TagHistoryToExcel> toExcel(String[] deviceCode, Date startTime, Date endTime) {
+	public List<TagHistory> toExcel(String[] deviceCode, Date startTime, Date endTime) {
+		
 		List<TagHistory> tags = queryHistoryList(deviceCode,startTime, endTime);
-		List<TagHistoryToExcel> tagExcelInfo = new ArrayList<>(); 
-		for(int i = 0; i < tags.size(); i++){ // 通过循环来赋值给另一个List
-			TagHistoryToExcel tagExcel = new TagHistoryToExcel();
-			tagExcel.setCreateTime(tags.get(i).getCreateTime());
-			tagExcel.setDeviceCode(tags.get(i).getDeviceCode());
-			tagExcel.setTagId(tags.get(i).getTagId());
-			tagExcelInfo.add(tagExcel);
-		}
-		return tagExcelInfo;
+//		long end = teh;
+//		System.out.println("");
+//		List<TagHistoryToExcel> tagExcelInfo = new ArrayList<>(); 
+//		for(int i = 0; i < tags.size(); i++){ // 通过循环来赋值给另一个List
+//			TagHistoryToExcel tagExcel = new TagHistoryToExcel();
+//			tagExcel.setCreateTime(tags.get(i).getCreateTime());
+//			tagExcel.setDeviceCode(tags.get(i).getDeviceCode());
+//			tagExcel.setTagId(tags.get(i).getTagId());
+//			tagExcelInfo.add(tagExcel);
+//		}
+//		return tagExcelInfo;
+		
+		
+		
+		return tags;
 	}
 
 	@Transactional

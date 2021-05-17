@@ -5,12 +5,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Workbook;
+//import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,8 +32,11 @@ import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
 import com.bimuo.easy.collection.personposition.v1.service.vo.TagHistoryToExcel;
 import com.google.common.base.Preconditions;
 
-import cn.afterturn.easypoi.excel.ExcelExportUtil;
-import cn.afterturn.easypoi.excel.entity.ExportParams;
+import cn.hutool.poi.excel.BigExcelWriter;
+import cn.hutool.poi.excel.ExcelUtil;
+
+//import cn.afterturn.easypoi.excel.ExcelExportUtil;
+//import cn.afterturn.easypoi.excel.entity.ExportParams;
 
 /**
  * 标签历史控制器
@@ -122,17 +126,31 @@ public class TagHistoryController {
 			realEndTime = simpleDateFormat.parse(endTime);
 		}
 		// 获取用户信息
-		List<TagHistoryToExcel> list = tagHistoryService.toExcel(deviceCode, realStartTime,realEndTime);
+		List<TagHistory> list = tagHistoryService.toExcel(deviceCode, realStartTime,realEndTime);
 		try {
 			// 设置响应输出的头类型及下载文件的默认名称
-			String fileName = new String("历史数据.xls".getBytes("utf-8"), "ISO-8859-1");
-			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
-			response.setContentType("application/vnd.ms-excel;charset=gb2312");
+//			String fileName = new String("历史数据.xls".getBytes("utf-8"), "ISO-8859-1");
+//			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+//			response.setContentType("application/vnd.ms-excel;charset=gb2312");
 			// 导出
-			Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams(), TagHistoryToExcel.class, list);
-			workbook.write(response.getOutputStream());
+//			Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams(), TagHistoryToExcel.class, list);
+//			workbook.write(response.getOutputStream());
+			BigExcelWriter writer = (BigExcelWriter) ExcelUtil.getBigWriter();
+			writer.addHeaderAlias("createTime", "创建时间");
+			writer.addHeaderAlias("deviceCode", "设备编号");
+			writer.addHeaderAlias("tagId", "卡号");
+			writer.setOnlyAlias(true);
+			writer.write(list, true);
+			//response为HttpServletResponse对象
+			response.setContentType("application/vnd.ms-excel;charset=utf-8"); 
+			//test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+			response.setHeader("Content-Disposition","attachment;filename=history.xls"); 
+			ServletOutputStream out=response.getOutputStream(); 
+			writer.flush(out);
+			// 关闭writer，释放内存
+			writer.close();
 			log.info("Excel 【历史标签】导出成功!");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("Excel 【历史标签】导出异常：{}", e.getMessage());
 		}
 	}
