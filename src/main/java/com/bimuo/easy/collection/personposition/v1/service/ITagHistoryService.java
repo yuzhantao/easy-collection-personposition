@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
 import com.bimuo.easy.collection.personposition.v1.model.TagHistory;
-import com.bimuo.easy.collection.personposition.v1.service.vo.TagHistoryToExcel;
 
 /**
  * 标签历史服务

@@ -1,6 +1,5 @@
 package com.bimuo.easy.collection.personposition.v1.controller;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bimuo.easy.collection.personposition.v1.exception.TagHistoryAddFailedException;
 import com.bimuo.easy.collection.personposition.v1.model.TagHistory;
 import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
-import com.bimuo.easy.collection.personposition.v1.service.vo.TagHistoryToExcel;
 import com.google.common.base.Preconditions;
 
 import cn.hutool.poi.excel.BigExcelWriter;
@@ -47,7 +45,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 @RestController
 @RequestMapping("/tags-history")
 public class TagHistoryController {
-	private static final Logger log = LogManager.getLogger(DeviceHistoryController.class);
+	private static final Logger log = LogManager.getLogger(TagHistoryController.class);
 	
 	@Autowired
 	private ITagHistoryService tagHistoryService;
@@ -135,6 +133,7 @@ public class TagHistoryController {
 			// 导出
 //			Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams(), TagHistoryToExcel.class, list);
 //			workbook.write(response.getOutputStream());
+			// 使用hutool方式导出excel
 			BigExcelWriter writer = (BigExcelWriter) ExcelUtil.getBigWriter();
 			writer.addHeaderAlias("createTime", "创建时间");
 			writer.addHeaderAlias("deviceCode", "设备编号");
@@ -144,7 +143,7 @@ public class TagHistoryController {
 			//response为HttpServletResponse对象
 			response.setContentType("application/vnd.ms-excel;charset=utf-8"); 
 			//test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-			response.setHeader("Content-Disposition","attachment;filename=history.xls"); 
+			response.setHeader("Content-Disposition","attachment;filename=tagHistory.xls"); 
 			ServletOutputStream out=response.getOutputStream(); 
 			writer.flush(out);
 			// 关闭writer，释放内存

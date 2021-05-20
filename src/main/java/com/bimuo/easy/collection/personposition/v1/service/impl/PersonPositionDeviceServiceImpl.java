@@ -30,7 +30,6 @@ import com.bimuo.easy.collection.personposition.v1.mqtt.IMqttMessageSenderServic
 import com.bimuo.easy.collection.personposition.v1.repository.IPersonPositionDeviceRepository;
 import com.bimuo.easy.collection.personposition.v1.service.IPersonPositionDeviceService;
 import com.bimuo.easy.collection.personposition.v1.service.util.CodeChannelMapping;
-import com.bimuo.easy.collection.personposition.v1.service.vo.BrandInfo;
 import com.google.common.base.Preconditions;
 
 /**
@@ -206,23 +205,6 @@ public class PersonPositionDeviceServiceImpl implements IPersonPositionDeviceSer
 	@Override
 	public int countByDeviceState(String deviceState) {
 		return personPositionDeviceRepository.countByDeviceStateAndIsEffective(deviceState,true);
-	}
-
-	@Override
-	public List<BrandInfo> toExcel(Date startTime,Date endTime) {
-		List<PersonPositionDevice> devices = queryHistoryList(startTime, endTime);
-		List<BrandInfo> excelInfo = new ArrayList<>(); 
-		for(int i = 0; i < devices.size(); i++){ // 通过循环来赋值给另一个List
-			BrandInfo excel = new BrandInfo();
-			excel.setDeviceCode(devices.get(i).getDeviceCode());
-			excel.setDeviceState(devices.get(i).getDeviceState());
-			excel.setDeviceType(devices.get(i).getDeviceType());
-			excel.setIp(devices.get(i).getIp());
-			excel.setCreateTime(devices.get(i).getCreateTime());
-			excel.setUpdateTime(devices.get(i).getUpdateTime());
-			excelInfo.add(excel);
-		}
-		return excelInfo;
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.bimuo.easy.collection.personposition.v1.service.impl;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +28,6 @@ import com.bimuo.easy.collection.personposition.v1.model.TagHistory;
 import com.bimuo.easy.collection.personposition.v1.repository.ITagHistoryRepository;
 import com.bimuo.easy.collection.personposition.v1.service.ITagHistoryService;
 import com.bimuo.easy.collection.personposition.v1.service.util.CodeChannelMapping;
-import com.bimuo.easy.collection.personposition.v1.service.vo.TagHistoryToExcel;
 import com.google.common.base.Preconditions;
 
 import io.netty.buffer.ByteBuf;
@@ -140,10 +138,7 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
 
 	@Override
 	public List<TagHistory> toExcel(String[] deviceCode, Date startTime, Date endTime) {
-		
 		List<TagHistory> tags = queryHistoryList(deviceCode,startTime, endTime);
-//		long end = teh;
-//		System.out.println("");
 //		List<TagHistoryToExcel> tagExcelInfo = new ArrayList<>(); 
 //		for(int i = 0; i < tags.size(); i++){ // 通过循环来赋值给另一个List
 //			TagHistoryToExcel tagExcel = new TagHistoryToExcel();
@@ -153,9 +148,6 @@ public class TagHistoryServiceImpl implements ITagHistoryService {
 //			tagExcelInfo.add(tagExcel);
 //		}
 //		return tagExcelInfo;
-		
-		
-		
 		return tags;
 	}
 

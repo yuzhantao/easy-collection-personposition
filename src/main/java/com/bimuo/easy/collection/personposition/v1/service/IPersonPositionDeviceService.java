@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.bimuo.easy.collection.personposition.v1.model.PersonPositionDevice;
-import com.bimuo.easy.collection.personposition.v1.service.vo.BrandInfo;
 
 /**
  * 人员定位相关服务
@@ -87,15 +86,6 @@ public interface IPersonPositionDeviceService {
 	 */
 	public int countByDeviceState(String deviceState);
 	
-	/**
-	 * 导出实时数据到Excel
-	 * @param startTime 开始时间
-	 * @param endTime 结束时间
-	 * @param pageable
-	 * @return Excel实体集合
-	 */
-	List<BrandInfo> toExcel(Date startTime,Date endTime);
-
 	/**
 	 * 更新有效设备的状态为离线
 	 */
